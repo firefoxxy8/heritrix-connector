@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+  <context:annotation-config/>
+  <bean class="org.springframework.beans.factory.config.PropertyOverrideConfigurer" id="simpleOverrides">
+    <property name="properties">
+      <value># This Properties map is specified in the Java 'property list' text format
+# http://java.sun.com/javase/6/docs/api/java/util/Properties.html#load%28java.io.Reader%29
+
+metadata.operatorContactUrl=http://www.searchtechnologies.com
+metadata.jobName=basic
+metadata.description=Basic crawl starting with useful defaults
+
+##..more?..##</value>
+    </property>
+  </bean>
+  <bean class="org.springframework.beans.factory.config.PropertyOverrideConfigurer" id="longerOverrides">
+    <property name="properties">
+      <props>
+        <prop key="seeds.textSource.value"># URLS HERE
+http://localhost:8888/index.html</prop>
+      </props>
+    </property>
+  </bean>
+  <bean autowire="byName" class="org.archive.modules.CrawlMetadata" id="metadata">
+    <property name="operatorContactUrl" value="[see override above]"/>
+    <property name="jobName" value="[see override above]"/>
+    <property name="description" value="[see override above]"/>
+  </bean>
+  <bean class="org.archive.modules.seeds.TextSeedModule" id="seeds">
+    <property name="textSource">
+      <bean class="org.archive.spring.ConfigString">
+        <property name="value">
+          <value># [see override above]</value>
+        </property>
+      </bean>
+    </property>
+  </bean>
+  <bean class="org.archive.modules.deciderules.DecideRuleSequence" id="scope">
+    <property name="rules">
+      <list>
+        <bean class="org.archive.modules.deciderules.RejectDecideRule"/>
+        <bean class="org.archive.modules.deciderules.surt.SurtPrefixedDecideRule"/>
+        <bean class="org.archive.modules.deciderules.TooManyHopsDecideRule">
+          <property name="maxHops" value="3"/>
+        </bean>
+        <bean class="org.archive.modules.deciderules.TransclusionDecideRule"/>
+        <bean class="org.archive.modules.deciderules.surt.SurtPrefixedDecideRule">
+          <property name="decision" value="REJECT"/>
+          <property name="seedsAsSurtPrefixes" value="false"/>
+          <property name="surtsDumpFile" value="${launchId}/negative-surts.dump"/>
+        </bean>
+        <bean class="org.archive.modules.deciderules.MatchesListRegexDecideRule">
+          <property name="decision" value="REJECT"/>
+          <property name="listLogicalOr" value="true"/>
+          <property name="regexList">
+            <list>
+              <value>.*\.js.*</value>
+              <value>.*\.css.*</value>
+              <value>.*\.swf.*</value>
+			  <value>.*\.ico.*</value>
+            </list>
+          </property>
+        </bean>
+        <bean class="org.archive.modules.deciderules.PathologicalPathDecideRule"/>
+        <bean class="org.archive.modules.deciderules.TooManyPathSegmentsDecideRule"/>
+        <bean class="org.archive.modules.deciderules.PrerequisiteAcceptDecideRule"/>
+        <bean class="org.archive.modules.deciderules.SchemeNotInSetDecideRule"/>
+      </list>
+    </property>
+  </bean>
+  <bean class="org.archive.crawler.prefetch.CandidateScoper" id="candidateScoper"/>
+  <bean class="org.archive.crawler.prefetch.FrontierPreparer" id="preparer"/>
+  <bean class="org.archive.modules.CandidateChain" id="candidateProcessors">
+    <property name="processors">
+      <list>
+        <ref bean="candidateScoper"/>
+        <ref bean="preparer"/>
+      </list>
+    </property>
+  </bean>
+  <bean class="org.archive.crawler.prefetch.Preselector" id="preselector"/>
+  <bean class="org.archive.crawler.prefetch.PreconditionEnforcer" id="preconditions"/>
+  <bean class="org.archive.modules.fetcher.FetchDNS" id="fetchDns"/>
+  <bean class="org.archive.modules.fetcher.FetchHTTP" id="fetchHttp"/>
+  <bean class="org.archive.modules.extractor.ExtractorHTTP" id="extractorHttp"/>
+  <bean class="org.archive.modules.extractor.ExtractorHTML" id="extractorHtml"/>
+  <bean class="org.archive.modules.FetchChain" id="fetchProcessors">
+    <property name="processors">
+      <list>
+        <ref bean="preselector"/>
+        <ref bean="preconditions"/>
+        <ref bean="fetchDns"/>
+        <ref bean="fetchHttp"/>
+        <ref bean="extractorHttp"/>
+        <ref bean="extractorHtml"/>
+      </list>
+    </property>
+  </bean>
+  <bean class="com.searchtechnologies.aspire.components.heritrixconnector.AspireHeritrixProcessor" id="aspireProcessor"/>
+  <bean class="org.archive.crawler.postprocessor.CandidatesProcessor" id="candidates"/>
+  <bean class="org.archive.crawler.postprocessor.DispositionProcessor" id="disposition"/>
+  <bean class="org.archive.modules.DispositionChain" id="dispositionProcessors">
+    <property name="processors">
+      <list>
+        <ref bean="aspireProcessor"/>
+        <ref bean="candidates"/>
+        <ref bean="disposition"/>
+      </list>
+    </property>
+  </bean>
+  <bean class="org.archive.crawler.framework.CrawlController" id="crawlController"/>
+  <bean class="org.archive.crawler.frontier.BdbFrontier" id="frontier"/>
+  <bean class="org.archive.crawler.util.BdbUriUniqFilter" id="uriUniqFilter"/>
+  <bean class="org.archive.spring.Sheet" id="forceRetire">
+    <property name="map">
+      <map>
+        <entry key="disposition.forceRetire" value="true"/>
+      </map>
+    </property>
+  </bean>
+  <bean class="org.archive.spring.Sheet" id="smallBudget">
+    <property name="map">
+      <map>
+        <entry key="frontier.balanceReplenishAmount" value="20"/>
+        <entry key="frontier.queueTotalBudget" value="100"/>
+      </map>
+    </property>
+  </bean>
+  <bean class="org.archive.spring.Sheet" id="veryPolite">
+    <property name="map">
+      <map>
+        <entry key="disposition.delayFactor" value="10"/>
+        <entry key="disposition.minDelayMs" value="10000"/>
+        <entry key="disposition.maxDelayMs" value="1000000"/>
+        <entry key="disposition.respectCrawlDelayUpToSeconds" value="3600"/>
+      </map>
+    </property>
+  </bean>
+  <bean class="org.archive.spring.Sheet" id="highPrecedence">
+    <property name="map">
+      <map>
+        <entry key="frontier.balanceReplenishAmount" value="20"/>
+        <entry key="frontier.queueTotalBudget" value="100"/>
+      </map>
+    </property>
+  </bean>
+  <bean class="org.archive.crawler.framework.ActionDirectory" id="actionDirectory"/>
+  <bean class="org.archive.crawler.framework.CrawlLimitEnforcer" id="crawlLimiter">
+  	<property name="maxDocumentsDownload" value="10"/>
+  </bean>
+  
+  
+  <bean class="org.archive.crawler.framework.CheckpointService" id="checkpointService">
+    <property name="checkpointIntervalMinutes" value="2"/>
+  </bean>
+  <bean autowire="byName" class="org.archive.crawler.reporting.StatisticsTracker" id="statisticsTracker"/>
+  <bean class="org.archive.crawler.reporting.CrawlerLoggerModule" id="loggerModule"/>
+  <bean autowire="byType" class="org.archive.crawler.spring.SheetOverlaysManager" id="sheetOverlaysManager"/>
+  <bean class="org.archive.bdb.BdbModule" id="bdb"/>
+  <bean class="org.archive.modules.fetcher.BdbCookieStorage" id="cookieStorage"/>
+  <bean class="org.archive.modules.net.BdbServerCache" id="serverCache"/>
+  <bean class="org.archive.spring.ConfigPathConfigurer" id="configPathConfigurer"/>
+</beans>

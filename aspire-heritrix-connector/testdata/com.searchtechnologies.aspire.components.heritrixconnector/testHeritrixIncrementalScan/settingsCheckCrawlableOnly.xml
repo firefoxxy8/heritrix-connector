@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+  <configAdmin>
+    <properties pid="org.apache.felix.http">
+      <property name="org.osgi.service.http.port">50505</property>
+    </properties>
+    <properties pid="org.apache.felix.webconsole.internal.servlet.OsgiManager">
+      <property name="username">admin</property>
+      <property name="password">admin1</property>
+      <property name="manager.root">/osgi</property>
+    </properties>
+  </configAdmin>
+  <autoStart>
+    <application config="testHeritrixScannerCheckCrawlableOnly-system.xml" id="0"/>
+  </autoStart>
+</settings>

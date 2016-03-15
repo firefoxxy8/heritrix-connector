@@ -1,0 +1,4 @@
+USE JAVA 7
+
+This version of the Heritrix scanner should be built with Java 7, otherwise some
+of the unit tests may fail due to ordering of items in hash maps

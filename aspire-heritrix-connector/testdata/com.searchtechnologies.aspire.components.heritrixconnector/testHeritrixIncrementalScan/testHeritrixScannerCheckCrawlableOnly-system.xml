@@ -1,0 +1,81 @@
+<config name="TestHeritrixScanner">
+  <components>
+    
+
+    <component name="Main" subType="pipeline" factoryName="aspire-application">
+      <config>
+        <maxThreads>1</maxThreads>
+        <pipelines>
+          <pipeline name="add-pipe" default="true">
+            <script><![CDATA[
+              job | AddPrintToError
+              println "Add logged: "+job.getParentJob().getVariable("addUpdateCount").incrementAndGet();
+             ]]></script>
+          </pipeline>
+          <pipeline name="delete-page">
+            <script><![CDATA[
+              println "Deletion logged: "+job.getParentJob().getVariable("deleteCount").incrementAndGet();
+            ]]></script>
+          </pipeline>
+          <pipeline name="process-uncrawled">
+            <script>
+              job | FetchUrl | ProcessUncrawledStage
+            </script>
+            <branches>
+              <branch event="onError" pipelineManager="." pipeline="check-delete-limits" />
+              <branch event="onComplete" pipelineManager="." pipeline="add-pipe" />
+            </branches>
+          </pipeline>
+          <pipeline name="check-delete-limits">
+            <script>
+              job | CheckUrlForDeletion
+            </script>
+          </pipeline>
+        </pipelines>
+        <components>
+        
+          <component name="Scanner" subType="default" factoryName="heritrix-scanner-test">
+            <config>
+              <jobsFolder>heritrixJobs/</jobsFolder>
+              <defaultConfigFile>false</defaultConfigFile>
+              <configFileLocation>crawler-beans.cxml</configFileLocation>
+              <checkNotCrawlableContent>true</checkNotCrawlableContent>
+              <daysToDelete>2</daysToDelete>
+              <maxFailuresToDelete>2</maxFailuresToDelete>
+              <jdbmDir>testoutput/com.searchtechnologies.aspire.components.heritrixconnector/testHeritrixIncrementalScan/incremental/</jdbmDir>
+              <branches>
+                <branch event="onAdd" pipelineManager="." pipeline="add-pipe" />
+                <branch event="onUpdate" pipelineManager="." pipeline="add-pipe" />
+                <branch event="onDelete" pipelineManager="." pipeline="delete-page" />
+                <branch event="processUncrawled" pipelineManager="." pipeline="process-uncrawled" />
+                <branch event="checkForDeletion" pipelineManager="." pipeline="check-delete-limits" />
+              </branches>
+            </config>
+          </component>
+          <component name="AddPrintToError" subType="printToError" factoryName="heritrix-scanner-test">
+            <config>
+              <outputFile>testoutput/com.searchtechnologies.aspire.components.heritrixconnector/testHeritrixIncrementalScan/add.out</outputFile>
+            </config>
+          </component>
+
+          <!-- Fetch Url for uncrawled URLs -->
+          <component name="FetchUrl" subType="aspire-fetch-url" factoryName="heritrix-scanner-test" />
+
+          <component name="CheckUrlForDeletion" subType="checkUrlForDeletion" factoryName="heritrix-scanner-test">
+            <branches>
+              <branch event="onDelete" pipelineManager="." pipeline="add-pipe" />
+            </branches>
+          </component>
+
+          <!-- Process uncrawled Urls for deletion -->
+          <component name="ProcessUncrawledStage" subType="process-uncrawled-stage" factoryName="heritrix-scanner-test">
+            <branches>
+              <branch event="onUpdate" pipelineManager="." pipeline="add-pipe" />
+            </branches>
+          </component>
+          
+        </components>
+      </config>
+    </component>
+  </components>
+</config>

@@ -1,0 +1,386 @@
+<!-- 
+ ***************************************************************************
+ * Copyright 2012 Search Technologies Corp. 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *     
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ *
+ -->
+<?xml version="1.0" encoding="UTF-8"?>
+<application name="HeritrixConnector" typeFlags="scheduled"
+	minVersion="2.1-SNAPSHOT">
+	<components>
+
+		<component name="PerformanceLogger" subType="performanceLogger"
+			factoryName="aspire-tools">
+			<debug>${debug}</debug>
+			<logFile>log/${app.name}/performanceLogs.jobs</logFile>
+			<enable>${debug}</enable>
+		</component>
+
+		<component name="Main" subType="pipeline" factoryName="aspire-application">
+			<debug>${debug}</debug>
+			<gatherStatistics>${debug}</gatherStatistics>
+
+			<pipelines>
+				<pipeline name="scannerPipeline" default="true">
+					<stages>
+						<stage component="../PerformanceLogger" />
+						<stage component="IncomingJobLogger" />
+						<stage component="ExtractConfiguration" />
+						<stage component="Scanner" />
+					</stages>
+				</pipeline>
+			</pipelines>
+
+			<components>
+				<component name="IncomingJobLogger" subType="jobLogger"
+					factoryName="aspire-tools">
+					<debug>${debug}</debug>
+					<logFile>log/${app.name}/incoming.jobs</logFile>
+					<enable>${debug}</enable>
+				</component>
+
+				<component name="ExtractConfiguration" subType="default"
+					factoryName="aspire-groovy">
+					<debug>${debug}</debug>
+					<variable name="appname">"${app.name}"</variable>
+					<script>
+            <![CDATA[
+              import com.searchtechnologies.aspire.services.AspireObject;
+              // Move the cifs connector properties up to the top level
+              AspireObject properties = doc.get("routingTable");
+
+              if (properties != null)
+                properties = properties.get(appname);
+              if (properties != null)
+                properties = properties.get("properties");
+ 
+              if (properties != null){
+                AspireObject connector = properties.get("connectorSource");
+                if (connector != null)
+                  doc.add(connector);
+              }
+              component.debug("DOC: %s", doc.toXmlString());
+            ]]>
+					</script>
+				</component>
+
+				<component name="Scanner" subType="default"
+					factoryName="aspire-heritrix-connector">
+					<debug>${debug}</debug>
+					<fullRecovery>${fullRecovery}</fullRecovery>
+					<incrementalRecovery>${incrementalRecovery}</incrementalRecovery>
+					<jobsFolder>${heritrixJobsFolder}</jobsFolder>
+					<jdbmDir>${jdbmDir}</jdbmDir>
+					<checkpointIntervalMinutes>${checkpointIntervalMinutes}
+					</checkpointIntervalMinutes>
+					<enableAuditing>${enableAuditing}</enableAuditing>
+					<emitCrawlStartJobs>${emitStartJob}</emitCrawlStartJobs>
+					<emitCrawlEndJobs>${emitEndJob}</emitCrawlEndJobs>
+					<waitForSubJobsTimeout>${waitForSubJobs}</waitForSubJobsTimeout>
+					<rejectDefaults>${rejectDefaults}</rejectDefaults>
+					<failedDocumentsService>${fdServiceUrl}</failedDocumentsService>
+					<branches>
+						<branch event="onAdd" pipelineManager="../ProcessPipelineManager"
+							pipeline="processPagePipeline" batching="true" batchSize="${batchSize}"
+							batchTimeout="${batchTimeout}" simultaneousBatches="2" />
+						<branch event="onUpdate" pipelineManager="../ProcessPipelineManager"
+							pipeline="processPagePipeline" batching="true" batchSize="${batchSize}"
+							batchTimeout="${batchTimeout}" simultaneousBatches="2" />
+						<branch event="onDelete" pipelineManager="../ProcessPipelineManager"
+							pipeline="processDeletePipeline" batching="true" batchSize="${batchSize}"
+							batchTimeout="${batchTimeout}" simultaneousBatches="2" />
+						<branch event="processUncrawled" pipelineManager="../ProcessPipelineManager"
+							pipeline="processUncrawledPipeline" batching="true" batchSize="${batchSize}"
+							batchTimeout="${batchTimeout}" simultaneousBatches="2" />
+						<branch event="checkForDeletion" pipelineManager="../ProcessPipelineManager"
+							pipeline="checkDeleteLimitsPipeline" batching="true" batchSize="${batchSize}"
+							batchTimeout="${batchTimeout}" simultaneousBatches="2" />
+						<branch event="onCrawlStart" pipelineManager="../ProcessPipelineManager"
+							pipeline="crawlStartEndPipeline" allowRemote="true" />
+						<branch event="onCrawlEnd" pipelineManager="../ProcessPipelineManager"
+							pipeline="crawlStartEndPipeline" allowRemote="true" />
+					</branches>
+				</component>
+			</components>
+		</component>
+
+		<component name="ProcessPipelineManager" subType="pipeline"
+			factoryName="aspire-application">
+			<debug>${debug}</debug>
+			<gatherStatistics>${debug}</gatherStatistics>
+			<queueSize>${jobQueue}</queueSize>
+		    <maxThreads>${maxThreads}</maxThreads>
+			<pipelines>
+				<pipeline name="processPagePipeline" default="true">
+				    <script><![CDATA[
+				      import com.searchtechnologies.aspire.framework.Standards;
+				      
+              job | stage("../PerformanceLogger") | AfterScanWorkflow | DetectNonTextDocuments
+              
+              if ('true'.equals(doc.getText('nonTextDocument'))) {
+                if (${enableFetchUrl}) {
+                  
+                } else {
+                  def is = job.getVariable(Standards.Basic.CONTENT_STREAM_KEY);
+                  if (is != null) {
+                    is.close();
+                  }
+                }
+              } else if (!${disableTextExtract})  
+                job | ExtractText
+              ]]>
+          </script>
+          <!-- stages>
+						<stage component="../PerformanceLogger" />
+						<stage component="AfterScanWorkflow" />
+						<stage component="ExtractText" disable="${disableTextExtract}" />
+					</stages-->
+					<branches>
+						<branch event="onComplete" pipelineManager="./"
+							pipeline="addUpdateWorkflowPipeline" />
+						<branch event="onError" pipelineManager="./" pipeline="errorPipeline" />
+					</branches>
+				</pipeline>
+				<pipeline name="addUpdateWorkflowPipeline">
+					<stages>
+						<stage component="AddUpdateWorkflow" />
+						<stage component="AddUpdateJobLogger" />
+					</stages>
+					<branches>
+						<branch event="onError" pipelineManager="./" pipeline="errorPipeline" />
+						<branch event="onComplete" pipelineManager="./"
+							pipeline="publishWorkflowPipeline" />
+					</branches>
+				</pipeline>
+				<pipeline name="crawlStartEndPipeline">
+					<stages>
+						<stage component="PublishWorkflow" />
+					</stages>
+					<branches>
+						<branch event="onError" pipelineManager="./" pipeline="errorPipeline" />
+					</branches>
+				</pipeline>
+				<pipeline name="processDeletePipeline">
+					<stages>
+						<stage component="../PerformanceLogger" />
+						<stage component="AfterScanWorkflow" />
+					</stages>
+					<branches>
+						<branch event="onError" pipelineManager="./" pipeline="errorPipeline" />
+						<branch event="onComplete" pipelineManager="./"
+							pipeline="deleteWorkflowPipeline" />
+					</branches>
+				</pipeline>
+				<pipeline name="deleteWorkflowPipeline">
+					<stages>
+						<stage component="DeleteWorkflow" />
+						<stage component="DeleteJobLogger" />
+					</stages>
+					<branches>
+						<branch event="onError" pipelineManager="./" pipeline="errorPipeline" />
+						<branch event="onComplete" pipelineManager="./"
+							pipeline="publishWorkflowPipeline" />
+					</branches>
+				</pipeline>
+				<pipeline name="publishWorkflowPipeline">
+					<stages>
+						<stage component="PublishWorkflow" />
+					</stages>
+					<branches>
+						<branch event="onError" pipelineManager="./" pipeline="errorPipeline" />
+					</branches>
+				</pipeline>
+				<pipeline name="processUncrawledPipeline">
+					<stages>
+						<stage component="../PerformanceLogger" />
+						<stage component="FetchUrl" />
+						<stage component="ProcessUncrawledStage" />
+					</stages>
+					<branches>
+						<branch event="onError" pipelineManager="."
+							pipeline="checkDeleteLimitsPipeline" />
+						<branch event="onComplete" pipelineManager="."
+							pipeline="addUpdateWorkflowPipeline" />
+					</branches>
+				</pipeline>
+				<pipeline name="checkDeleteLimitsPipeline">
+					<stages>
+						<stage component="../PerformanceLogger" />
+						<stage component="CheckUrlForDeletion" />
+					</stages>
+				</pipeline>
+				<pipeline name="errorPipeline">
+					<stages>
+						<stage component="ErrorJobLogger" />
+						<stage component="ErrorWorkflow" />
+					</stages>
+				</pipeline>
+			</pipelines>
+
+			<components>
+          
+        <component name="DetectNonTextDocuments" subType="default" factoryName="aspire-groovy">
+          <debug>${debug}</debug>
+          <variable name="nonTextDocumentsExtensions"><![CDATA[
+              if (!${non-text-document})
+                return null;
+              def ext = "";
+              try {
+               ext = $/${nonTextDocumentsExtensions}/$;
+              } catch (Exception e) {
+              
+              }
+              if (ext.trim().isEmpty() || ext.contains("nonTextDocumentsExtensions"))
+                return [];
+              return "${nonTextDocumentsExtensions}".toUpperCase().split(",")
+          ]]></variable>
+          <variable name="regexList"><![CDATA[
+              if (${non-text-document})
+                return null;
+              def file = new File($/${nonTextDocuments}/$)
+              def regexList = []
+              
+              if (!file.exists()) {
+              	component.warn("The regex file "+file+" doesn't exist.")
+              	return regexList;
+              }
+              
+              file.eachLine() { line ->
+                regexList.add(line)
+              }
+              if (regexList.size() == 0)
+                component.warn("There are no regex inside of the "+file+" file");
+              return regexList;
+              ]]></variable>
+          <variable name="useExtensions">return ${non-text-document}</variable>
+          <script>
+            <![CDATA[
+              if (useExtensions) {
+                for (ext in nonTextDocumentsExtensions) {
+                  if (doc.url.text().toUpperCase().endsWith("."+ext)) {
+                     doc.set("nonTextDocument","true")
+                     break;
+                  }
+                }
+              } else {
+                for (regex in regexList) {
+                  if (doc.url.text().matches(regex)) {
+                     doc.set("nonTextDocument","true")
+                     break;
+                  }
+                }
+              }
+            ]]>
+          </script>
+        </component>
+          
+				<component name="AfterScanWorkflow" subType="default"
+					factoryName="aspire-business-rules">
+					<debug>${debug}</debug>
+					<libraries>${aspire.config.dir}/workflow-libraries</libraries>
+					<plan reload="${workflowReloadPeriod}" file="${cs.config.dir}/workflow.xml"
+						id="afterScan" errorTolerant="${workflowErrorTolerant}" />
+				</component>
+
+				<component name="PublishWorkflow" subType="default"
+					factoryName="aspire-business-rules">
+					<debug>${debug}</debug>
+					<libraries>${aspire.config.dir}/workflow-libraries</libraries>
+					<plan reload="${workflowReloadPeriod}" file="${cs.config.dir}/workflow.xml"
+						id="onPublish" errorTolerant="${workflowErrorTolerant}" />
+				</component>
+
+				<!-- Opens a content stream to the URL that is being processed -->
+				<component name="FetchUrl" subType="default" factoryName="aspire-fetch-url">
+					<debug>${debug}</debug>
+				</component>
+
+				<!-- Extract text from the document if possible -->
+				<component name="ExtractText" subType="default"
+					factoryName="aspire-extract-text" disable="${disableTextExtract}">
+					<debug>${debug}</debug>
+					<maxCharacters>${extractTextMaxSize}</maxCharacters>
+					<extractTimeout>${extractTimeout}</extractTimeout>
+				</component>
+
+				<component name="AddUpdateWorkflow" subType="default"
+					factoryName="aspire-business-rules">
+					<debug>${debug}</debug>
+					<libraries>${aspire.config.dir}/workflow-libraries</libraries>
+					<plan reload="${workflowReloadPeriod}" file="${cs.config.dir}/workflow.xml"
+						id="onAddUpdate" errorTolerant="${workflowErrorTolerant}" />
+				</component>
+
+				<component name="AddUpdateJobLogger" subType="jobLogger"
+					factoryName="aspire-tools">
+					<debug>${debug}</debug>
+					<logFile>log/${app.name}/addUpdate.jobs</logFile>
+					<enable>${debug}</enable>
+				</component>
+
+				<component name="DeleteWorkflow" subType="default"
+					factoryName="aspire-business-rules">
+					<debug>${debug}</debug>
+					<libraries>${aspire.config.dir}/workflow-libraries</libraries>
+					<plan reload="${workflowReloadPeriod}" file="${cs.config.dir}/workflow.xml"
+						id="onDelete" errorTolerant="${workflowErrorTolerant}" />
+				</component>
+
+				<component name="DeleteJobLogger" subType="jobLogger"
+					factoryName="aspire-tools">
+					<debug>${debug}</debug>
+					<logFile>log/${app.name}/delete.jobs</logFile>
+					<enable>${debug}</enable>
+				</component>
+
+				<component name="ErrorWorkflow" subType="default"
+					factoryName="aspire-business-rules">
+					<debug>${debug}</debug>
+					<libraries>${aspire.config.dir}/workflow-libraries</libraries>
+					<plan reload="${workflowReloadPeriod}" file="${cs.config.dir}/workflow.xml"
+						id="onError" errorTolerant="${workflowErrorTolerant}"
+						errorWorkflow="true" />
+				</component>
+
+				<component name="ErrorJobLogger" subType="jobLogger"
+					factoryName="aspire-tools">
+					<debug>${debug}</debug>
+					<logFile>log/${app.name}/error.jobs</logFile>
+					<enable>${debug}</enable>
+				</component>
+
+				<component name="CheckUrlForDeletion" subType="checkUrlForDeletion"
+					factoryName="aspire-heritrix-connector">
+					<debug>${debug}</debug>
+					<branches>
+						<branch event="onDelete" pipelineManager="."
+							pipeline="processDeletePipeline" />
+					</branches>
+				</component>
+
+				<!-- Process uncrawled Urls for deletion -->
+				<component name="ProcessUncrawledStage" subType="process-uncrawled-stage"
+					factoryName="aspire-heritrix-connector">
+					<debug>${debug}</debug>
+					<branches>
+						<branch event="onUpdate" pipelineManager="."
+							pipeline="processDeletePipeline" />
+					</branches>
+				</component>
+
+			</components>
+		</component>
+
+	</components>
+</application>

@@ -1,0 +1,4 @@
+USE JAVA 6
+
+This version of the Heritrix engine should be built with Java 6, otherwise some
+of the unit tests fail due to ordering of items in hash maps

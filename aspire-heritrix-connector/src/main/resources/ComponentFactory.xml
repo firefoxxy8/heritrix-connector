@@ -1,0 +1,29 @@
+<!-- 
+ ***************************************************************************
+ * Copyright 2012 Search Technologies Corp. 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *     
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ *
+ -->
+<componentFactory name="aspire-heritrix-connector">
+  <subType name="default" implementation="com.searchtechnologies.aspire.components.heritrixconnector.HeritrixScanner">
+    <description>Heritrix Scanner for Aspire</description>
+  </subType>
+  <subType name="process-uncrawled-stage" implementation="com.searchtechnologies.aspire.components.heritrixconnector.ProcessUncrawledStage">
+    <description>Heritrix stage for uncrawled URLs</description>
+  </subType>
+  <subType name="checkUrlForDeletion" implementation="com.searchtechnologies.aspire.components.heritrixconnector.CheckUrlForDeletionStage">
+    <description>Check Url limits For Deletion</description>
+  </subType>
+</componentFactory>
+

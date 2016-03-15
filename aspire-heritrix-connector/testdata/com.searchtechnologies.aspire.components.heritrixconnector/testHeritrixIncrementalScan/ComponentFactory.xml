@@ -1,0 +1,17 @@
+<componentFactory name="heritrix-scanner-test">
+  <subType name="default" implementation="com.searchtechnologies.aspire.components.heritrixconnector.HeritrixScanner">
+    <description>Aspire connector for Heritrix</description>
+  </subType>
+  <subType name="printToError" implementation="com.searchtechnologies.aspire.components.heritrixconnector.PrintToErrorStage">
+    <description>Print To Error stage. Simply prints the job to the error stream. Used for debugging and testing.</description>
+  </subType>
+  <subType name="process-uncrawled-stage" implementation="com.searchtechnologies.aspire.components.heritrixconnector.ProcessUncrawledStage">
+    <description>Heritrix stage for uncrawled URLs</description>
+  </subType>
+  <subType name="checkUrlForDeletion" implementation="com.searchtechnologies.aspire.components.heritrixconnector.CheckUrlForDeletionStage">
+    <description>Check Url limits For Deletion</description>
+  </subType>
+  <subType name="aspire-fetch-url" implementation="com.searchtechnologies.aspire.docprocessing.fetchurl.FetchURLStage">
+    <description>The fetch URL stage. Fetches the URL specified in &lt;fetchURL&gt;.</description>
+  </subType>
+</componentFactory> 

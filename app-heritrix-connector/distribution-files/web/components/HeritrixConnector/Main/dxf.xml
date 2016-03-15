@@ -1,0 +1,109 @@
+<dxf:template version="1.0" xmlns:dxf="http://www.searchtechnologies.com/DXF/2011">
+  <properties>
+	  <connectorSource>
+	  	<dxf:alternatives display="Heritrix Job Configuration File" key="defaultConfigFile" default="true">
+	      <dxf:help>Specify the Heritrix Job configuration file to use.</dxf:help>
+	      <dxf:alternative display="Standard Configuration" value="true">
+	        <dxf:help>Uses the default Heritrix Job configuration file for Aspire, only the start url is set.</dxf:help>
+	        <url display="Seed URLs" style="width:300px" type="textarea">
+			  <dxf:help>Specify the seed URLs to crawl. One URL per line.</dxf:help>
+			</url>
+			<crawlScope display="Crawl Scope" type="pulldown">
+		      <dxf:help>Specify the crawl scope for this source.</dxf:help>
+		      <dxf:option display="All">all</dxf:option>
+		      <dxf:option display="Stay Within Domain">stayWithinDomain</dxf:option>
+		      <dxf:option display="Stay Within Host">stayWithinHost</dxf:option>
+		    </crawlScope>
+		    <maxHops display="Max Hops" type="string" default="3">
+			  <dxf:help>Maximum number of hops to allow to crawl.</dxf:help>
+			</maxHops>
+			<seedsRetry>
+			  <dxf:attribute name="retryDelay" display="Retry delay" type="string" default="20">
+			    <dxf:help>
+			    Time in seconds to wait between retries for failed seeds.
+			    </dxf:help>
+			  </dxf:attribute>
+			  <dxf:attribute name="maxRetries" display="Max Retries" type="string" default="5">
+          <dxf:help>
+          Number of retries for failed seeds.
+          </dxf:help>
+        </dxf:attribute>
+			</seedsRetry>
+			<millisecondsPerRequest display="Milliseconds per request" type="string" default="3000">
+			  <dxf:help>The number of milliseconds to wait between each request made by Heritrix during the crawl.</dxf:help>
+			</millisecondsPerRequest>
+			<dxf:br/>
+
+			<crawlPatterns>
+				<dxf:h2 style="font-size:12px;font-weight:bold;color:#0A365E;">Crawl accept patterns</dxf:h2>
+				<accept multiple="true">
+					<dxf:attribute name="pattern" display="Pattern" type="string">
+					<dxf:help>Specify url patterns to accept.</dxf:help>
+					</dxf:attribute>
+				</accept>
+				<dxf:hr style="width:20%;"/>
+				<dxf:h2 style="font-size:12px;font-weight:bold;color:#0A365E;">Crawl reject patterns</dxf:h2>
+				<reject multiple="true">
+					<dxf:attribute name="pattern" display="Pattern" type="string">
+					<dxf:help>Specify url patterns to reject.</dxf:help>
+					</dxf:attribute>
+				</reject>
+			</crawlPatterns>
+			<dxf:br/>
+	      </dxf:alternative>
+	      <dxf:alternative display="Custom Configuration" value="false">
+	        <dxf:help>Uses the configuration file specified.</dxf:help>
+	        <configFileLocation display="Configuration File Location" type="string">
+	          <dxf:help>Specifies the location of the configuration file to use.  This file will then be copied to Heritrix's Job Folder.</dxf:help>
+	        </configFileLocation>
+		  </dxf:alternative>
+	    </dxf:alternatives>
+	    <dxf:hr/>
+	    
+	    <dxf:alternatives subType="checkbox" display="Configure Incremental Indexing" key="defaultIncrementalIndexing" default="false">
+	      <dxf:help>Check this to use a different directory for storing the database for holding Incremental crawls data. Otherwise, the default directory will be used</dxf:help>
+	      <dxf:alternative display="Configure Incremental Indexing" value="true">
+		      <fetchDelay display="Fetch Delay" type="string" default="500" style="width:80px">
+	          <dxf:help>Time in millisenconds to wait between the first and second fetches made by the connector</dxf:help>
+	        </fetchDelay>
+		      <daysToDelete display="Days before delete" type="string" default="2" style="width:80px">
+		        <dxf:help>Number of days to wait before delete not crawlable or not accessible URLs</dxf:help>
+		      </daysToDelete>
+		      <maxFailuresToDelete display="Iterations before delete" type="string" default="5" style="width:80px">
+		        <dxf:help>Number of iterations before delete not crawlable or not accessible URLs</dxf:help>
+		      </maxFailuresToDelete>
+		      <dxf:br/>
+		      <dxf:alternatives subType="checkbox" display="Verify old URLs" key="checkNotCrawlableContent" default="false">
+		        <dxf:help>Check if you want the connector to verify old URLs which are no longer reachable from other URLs (example: if a referring site was deleted). Otherwise those URLs will be deleted.</dxf:help>
+		        <dxf:alternative display="Verify old URLs" value="true">
+		          <uncrawledAccessDelay display="Access Delay" type="string" default="2000" style="width:80px">
+		            <dxf:help>Time in milliseconds to wait between checks (for old URLs) from the same host</dxf:help>
+		          </uncrawledAccessDelay>  
+		        </dxf:alternative>
+		      </dxf:alternatives>  
+        </dxf:alternative>
+      </dxf:alternatives>
+      
+      <cleanupRegex display="Cleanup Regex" type="string" default="">
+        <dxf:help>Regular expression used to clean up the content to be indexed</dxf:help>
+      </cleanupRegex>
+	  
+        <indexPatterns>
+			<dxf:h2 style="font-size:12px;font-weight:bold;color:#0A365E;">Index accept patterns</dxf:h2>
+			<accept multiple="true">
+				<dxf:attribute name="pattern" display="Pattern" type="string">
+				<dxf:help>Specify url patterns to accept.</dxf:help>
+				</dxf:attribute>
+			</accept>
+			<dxf:hr style="width:20%;"/>
+			<dxf:h2 style="font-size:12px;font-weight:bold;color:#0A365E;">Index reject patterns</dxf:h2>
+			<reject multiple="true">
+				<dxf:attribute name="pattern" display="Pattern" type="string">
+				<dxf:help>Specify url patterns to reject.</dxf:help>
+				</dxf:attribute>
+			</reject>
+		</indexPatterns>
+		<dxf:br/>
+	  </connectorSource>
+  </properties>
+</dxf:template>

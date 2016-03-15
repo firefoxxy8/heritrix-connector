@@ -1,0 +1,415 @@
+<!-- 
+ ***************************************************************************
+ * Copyright 2012 Search Technologies Corp. 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *     
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ *
+ -->
+<dxf:template version="1.0"
+	xmlns:dxf="http://www.searchtechnologies.com/DXF/2011">
+	<contentSourceConfig>
+
+		<connectorSource>
+			<dxf:alternatives subType="pulldown" display="Heritrix Job Configuration File" key="defaultConfigFile" default="true">
+				<dxf:help>Specify the Heritrix Job configuration file to use.
+				</dxf:help>
+				<dxf:alternative display="Standard Configuration" value="true">
+					<dxf:help>Uses the default Heritrix Job configuration file for
+						Aspire, only the start url is set.
+					</dxf:help>
+					<url display="Seed URLs" style="width:300px" type="textarea"
+						validations="required,listurls" protocols="http,https"
+						placeholder="e.g. http://www.searchtechnologies.com">
+						<dxf:help>Specify the seed URLs to crawl. One URL per line.
+						</dxf:help>
+					</url>
+					<crawlScope display="Crawl Scope" type="pulldown">
+						<dxf:help>Specify the crawl scope for this source.</dxf:help>
+						<dxf:option display="All">all</dxf:option>
+						<dxf:option display="Stay Within Domain">stayWithinDomain</dxf:option>
+						<dxf:option display="Stay Within Host">stayWithinHost</dxf:option>
+					</crawlScope>
+					<maxHops display="Max Hops" type="integer" default="3" min="0"
+						validations="required,integer">
+						<dxf:help>Maximum number of hops to allow to crawl.</dxf:help>
+					</maxHops>
+					<seedsRetry>
+						<dxf:attribute name="retryDelay" display="Retry delay"
+							type="string" min="0" default="20" validations="required,integer"
+							placeholder="20">
+							<dxf:help>Time in seconds to wait between retries for failed
+								seeds.</dxf:help>
+						</dxf:attribute>
+						<dxf:attribute name="maxRetries" display="Max Retries"
+							type="integer" default="5" min="0" validations="required,integer">
+							<dxf:help>Number of retries for failed seeds.</dxf:help>
+						</dxf:attribute>
+					</seedsRetry>
+					<millisecondsPerRequest display="Milliseconds per request"
+						type="string" min="0" default="3000" validations="required,integer"
+						placeholder="3000">
+						<dxf:help>The number of milliseconds to wait between each request
+							made by Heritrix during the crawl.
+						</dxf:help>
+					</millisecondsPerRequest>
+					<rejectDefaults display="Reject Images / Videos / Javascript / CSS"
+						type="boolean" default="true">
+						<dxf:help>Check if you want to reject js, css, swf, gif, png, jpg,
+							jpeg, bmp, mp3, mp4, avi, mpg and mpeg files.</dxf:help>
+					</rejectDefaults>
+					<dxf:br />
+					<crawlPatterns>
+						<dxf:h2>Crawl accept URL patterns</dxf:h2>
+						<accept multiple="true">
+							<dxf:attribute name="pattern" display="Pattern"
+								type="string" placeholder="e.g. .*\.jsp.* or .*\.html.*">
+								<dxf:help>Specify url patterns to accept. If accept and reject
+									patterns both match the accept takes precedence.</dxf:help>
+							</dxf:attribute>
+						</accept>
+						<dxf:hr style="height: 1px;" />
+						<dxf:h2>Crawl reject URL patterns</dxf:h2>
+						<reject multiple="true">
+							<dxf:attribute name="pattern" display="Pattern"
+								type="string" placeholder="e.g. .*\.jpg.* or .*\.css.*">
+								<dxf:help>Specify url patterns to reject. If accept and reject
+									patterns both match the accept takes precedence.</dxf:help>
+							</dxf:attribute>
+						</reject>
+					</crawlPatterns>
+					<dxf:br />
+					
+				</dxf:alternative>
+				<dxf:alternative display="Custom Configuration"
+					value="false">
+					<dxf:help>Uses the configuration file specified.</dxf:help>
+					<configFileLocation display="Configuration File Location"
+						type="string" validations="required" placeholder="e.g. config/crawler-beans.cxml">
+						<dxf:help>Specifies the location of the configuration file to use.
+							This file will then be copied to Heritrix's Job Folder.
+						</dxf:help>
+					</configFileLocation>
+				</dxf:alternative>
+			</dxf:alternatives>
+			
+			<dxf:hr style="height: 1px;" />
+			
+			<cleanupRegex display="Cleanup Regex" type="string"
+				default="" placeholder="&lt;!--googleoff: all-->[\s\S]*&lt;!--googleon: all-->">
+				<dxf:help>Regular expression used to clean up the content to be
+					indexed
+				</dxf:help>
+			</cleanupRegex>
+			
+			<dxf:alternatives subType="checkbox"
+				display="Configure Incremental Indexing" key="defaultIncrementalIndexing"
+				default="false">
+				<dxf:help>Enables incremental crawling for your seed URLs.
+				</dxf:help>
+				<dxf:alternative display="Configure Incremental Indexing"
+					value="true">
+					<fetchDelay display="Fetch Delay" type="integer"
+						default="500" min="1" style="width:80px" validations="required,integer"
+						placeholders="500">
+						<dxf:help>Time in millisenconds to wait between the first and
+							second fetches made by the connector
+						</dxf:help>
+					</fetchDelay>
+					<daysToDelete display="Days before delete" type="integer"
+						default="2" min="0" validations="required,integer">
+						<dxf:help>Number of days to wait before delete not crawlable or
+							not accessible URLs
+						</dxf:help>
+					</daysToDelete>
+					<maxFailuresToDelete display="Iterations before delete"
+						type="integer" default="5" min="0" validations="required,integer">
+						<dxf:help>Number of iterations before delete not crawlable or not
+							accessible URLs
+						</dxf:help>
+					</maxFailuresToDelete>
+					<dxf:br />
+					<dxf:alternatives subType="checkbox" display="Verify old URLs"
+						key="checkNotCrawlableContent" default="false">
+						<dxf:help>Check if you want the connector to verify old URLs which
+							are no longer reachable from other URLs (example: if a referring
+							site was deleted). Otherwise those URLs will be deleted. The
+							first
+							time a URL is detected as not crawlable and it is still available,
+							the scanner will send an UPDATE action for it, when it becomes
+							crawlable again another UPDATE action will be sent for it.
+						</dxf:help>
+						<dxf:alternative display="Verify old URLs" value="true">
+							<uncrawledAccessDelay display="Access Delay"
+								type="string" default="2000" validations="required,integer"
+								placeholders="2000">
+								<dxf:help>Time in milliseconds to wait between checks (for old
+									URLs) from the same host
+								</dxf:help>
+							</uncrawledAccessDelay>
+						</dxf:alternative>
+					</dxf:alternatives>
+				</dxf:alternative>
+			</dxf:alternatives>
+			
+			<fileNamePatterns>
+				<dxf:h2>Index include patterns</dxf:h2>
+				<include multiple="true">
+					<dxf:attribute name="pattern" display="Pattern" type="string"
+						placeholder="e.g. .*\.jsp.* or .*\.html.*">
+						<dxf:help>Specify url patterns to accept indexing.</dxf:help>
+					</dxf:attribute>
+				</include>
+				<dxf:hr style="height: 1px;" />
+				<dxf:h2>Index exclude patterns</dxf:h2>
+				<exclude multiple="true">
+					<dxf:attribute name="pattern" display="Pattern" type="string"
+						placeholder="e.g. .*\.jpg.* or .*\.css.*">
+						<dxf:help>Specify url patterns to reject from indexing.</dxf:help>
+					</dxf:attribute>
+				</exclude>
+			</fileNamePatterns>
+			<dxf:br />
+		</connectorSource>
+		<dxf:hr />
+		<properties>
+			<dxf:h1>Advanced Connector Properties</dxf:h1>
+			<dxf:alternatives subType="checkbox" display="Advanced Configuration" key="generalConfiguration" default="false">
+				<dxf:alternative display="Advanced Configuration" value="false">
+
+					<heritrixJobsFolder type="constant">${app.data.dir}/heritrixJobs</heritrixJobsFolder>
+					<jdbmDir type="constant">${app.data.dir}/incremental</jdbmDir>
+					<checkpointIntervalMinutes type="constant">15</checkpointIntervalMinutes>
+					<disableTextExtract type="constant">false</disableTextExtract>
+					<extractTextMaxSize type="constant">unlimited</extractTextMaxSize>
+					<extractTimeout type="constant">180000</extractTimeout>
+					<workflowReloadPeriod type="constant">15s</workflowReloadPeriod>
+					<workflowErrorTolerant type="constant">false</workflowErrorTolerant>
+					<non-text-document type="constant">true</non-text-document>
+					<nonTextDocumentsExtensions type="constant">jpg,gif,png,tif,mp3,mp4,mpg,mpeg,avi,mkv,wav,bmp,swf,jar,war,rar,zip,tgz,dll,exe,class</nonTextDocumentsExtensions>
+					<enableFetchUrl type="constant">true</enableFetchUrl>
+					<fullRecovery type="constant">incremental</fullRecovery>
+					<incrementalRecovery type="constant">incremental</incrementalRecovery>
+					<batchSize type="constant">50</batchSize>
+					<batchTimeout type="constant">60000</batchTimeout>
+					<waitForSubJobs type="constant">600000</waitForSubJobs>
+					<maxThreads type="constant">10</maxThreads>
+					<jobQueue type="constant">30</jobQueue>
+					<enableAuditing type="constant">true</enableAuditing>
+					<emitStartJob type="constant">true</emitStartJob>
+					<emitEndJob type="constant">true</emitEndJob>
+					<debug type="constant">false</debug>
+          <fdServiceUrl type="constant"/>
+
+				</dxf:alternative>
+				<dxf:alternative display="Advanced Configuration" value="true">
+
+					<dxf:hr />
+					
+					<dxf:h2>Advanced Scanner Properties</dxf:h2>
+					
+					<heritrixJobsFolder display="Heritrix Jobs Folder"
+						type="string" default="${app.data.dir}/heritrixJobs" validations="required,path"
+						placeholder="${app.data.dir}/heritrixJobs">
+						<dxf:help>Directory where heritrix engine will find jobs
+							configuration.
+						</dxf:help>
+					</heritrixJobsFolder>
+					
+					<jdbmDir display="Incremental Data Folder" type="string"
+						default="${app.data.dir}/incremental" validations="required,path"
+						placeholder="${app.data.dir}/incremental">
+						<dxf:help>Directory path where the Heritrix Scanner will store
+							incremental crawls data
+						</dxf:help>
+					</jdbmDir>
+					
+					<checkpointIntervalMinutes display="Checkpoints frequency (min)"
+						type="integer" default="15" min="1" validations="required,integer">
+						<dxf:help>Interval in minutes between each checkpoint made by the
+							Heritrix engine
+						</dxf:help>
+					</checkpointIntervalMinutes>
+					
+					<workflowReloadPeriod display="Workflow reload period"
+						type="String" default="15s" validations="required,timeperiod"
+						placeholder="e.g. 5ms, 5s, 5m, 5h or 5d" allowEmptyString="false">
+						<dxf:help>The period after which to reload the business rules.
+							Defaults to ms, but can be suffixed with ms, s,
+							m, h or d to indicate the required units
+						</dxf:help>
+					</workflowReloadPeriod>
+					
+					<batchSize display="Scanner Batch Size" type="integer"
+						default="50" min="1" max="10000" validations="integer" style="width:100px">
+						<dxf:help>Size of the batches the connector will be generating for
+							the publishers to work with.</dxf:help>
+					</batchSize>
+					
+					<batchTimeout display="Scanner Batch Timeout" type="integer"
+						default="60000" min="1" validations="integer">
+						<dxf:help>The period after which the scanner will stop the batch
+							process. Defaults value is in ms unit
+						</dxf:help>
+					</batchTimeout>
+					
+					<waitForSubJobs display="Wait for Sub Jobs timeout"
+						type="integer" default="600000" min="1" validations="integer"
+						style="width:100px">
+						<dxf:help>Maximum time to wait (in ms) for all subjobs to be
+							complete.</dxf:help>
+					</waitForSubJobs>
+					
+					<maxThreads display="Max Threads" type="integer"
+						default="10" min="1" validations="integer" style="width:100px">
+						<dxf:help>The maximum number of threads to create to handle jobs
+							put on the pipeline manager job queue.</dxf:help>
+					</maxThreads>
+					
+					<jobQueue display="Job Queue Size" type="integer" default="30"
+						min="1" validations="integer" style="width:100px">
+						<dxf:help>The size of the queue for processing jobs. It is
+							recommended that the queue size be at least
+							as large as the number of threads, if not two or three times
+							larger.
+						</dxf:help>
+					</jobQueue>
+					
+					<extractTimeout display="Extract Text Timeout" type="integer" default="180000" min="1" validations="integer">
+						<dxf:help>Maximum time to wait (in ms) for the text extraction</dxf:help>
+					</extractTimeout>
+					
+					<extractTextMaxSize display="Max Extract Size" type="string" default="unlimited" validations="required,regex"
+						regex="[0-9]+|Unlimited|unlimited">
+						<dxf:help>Max extract text size in number of characters or
+							"unlimited"</dxf:help>
+					</extractTextMaxSize>
+					
+					<disableTextExtract display="Disable text extraction"
+						type="boolean">
+						<dxf:help>[EXPERT] By default, connectors use Apache Tika to
+							extract text from downloaded documents.
+							If you wish to apply special text processing to the downloaded
+							document in the workflow,
+							you should disable text extraction. The downloaded document is then
+							available as a content stream
+						</dxf:help>
+					</disableTextExtract>
+					
+					<workflowErrorTolerant display="Error tolerant"
+						type="boolean">
+						<dxf:help>When set, exceptions in workflow rules will only effect
+							the execution of the rule in which the exception occurs.
+							Subsequent rules will be executed and the job will complete the
+							workflow successfully. If not set, exceptions
+							in workflow rules will be re-thrown and the job will be moved to
+							the error workflow
+						</dxf:help>
+					</workflowErrorTolerant>
+					
+					<emitStartJob display="Emit start job" type="boolean" default="true">
+						<dxf:help>When enabled, the connector will publish a "start" job
+							at the beginning of each crawl.
+							This can be used by the publisher to (for example) clear the index.
+						</dxf:help>
+					</emitStartJob>
+
+					<emitEndJob display="Emit end job" type="boolean" default="true">
+						<dxf:help>When enabled, the connector will publish an "end" job at
+							the end of each crawl.
+							This can be used by the publisher to (for example) commit the index.
+						</dxf:help>
+					</emitEndJob>
+
+					<enableAuditing display="Enable Auditing" type="boolean"
+						default="true">
+						<dxf:help>Check if you want to enable the audit logs.</dxf:help>
+					</enableAuditing>
+					
+					<debug display="Debug" type="boolean">
+						<dxf:help>Check if you want debug messages enabled.</dxf:help>
+					</debug>
+					
+					<dxf:hr />
+					
+					<dxf:h2>Non-Text Document Filtering</dxf:h2>
+					
+					<dxf:alternatives subType="pulldown"  display="Identify by" key="non-text-document"
+						default="true">
+						<dxf:alternative display="Extension list" value="true">
+							<nonTextDocumentsExtensions display="Non-text document extensions" validations="required"
+								type="string" placeholder="jpg,gif,mp3,mp4,mpg,avi,wav,bmp,swf"
+								default="jpg,gif,mp3,mp4,mpg,avi,wav,bmp,swf" style="width:350px;">
+								<dxf:help>Comma separated list of non-text document
+									extensions
+								</dxf:help>
+							</nonTextDocumentsExtensions>
+						</dxf:alternative>
+						<dxf:alternative display="Regex File" value="false">
+							<nonTextDocuments display="Non-Text regex list file"
+								type="string" placeholder="config/nonTextDocuments.txt" validations="path,required"
+								default="" style="width:350px;">
+								<dxf:help>Path to a file containing a list of regex that
+									matches the non-text documents, one regex expression per
+									line
+								</dxf:help>
+							</nonTextDocuments>
+						</dxf:alternative>
+					</dxf:alternatives>
+					
+					<enableFetchUrl display="Open Data Stream"
+						type="boolean" default="true">
+						<dxf:help>Select if you want the non-text documents to open an
+							input stream of the data
+						</dxf:help>
+					</enableFetchUrl>
+
+					<dxf:hr />
+					
+					<dxf:h2>Recovery Policy</dxf:h2>
+					
+					<fullRecovery display="Recover failed full crawl using"
+						type="pulldown" default="incremental">
+						<dxf:help>(ZooKeeper Failover) Action to do when recovering from a
+							failed full crawl.</dxf:help>
+						<dxf:option display="Full Crawl">full</dxf:option>
+						<dxf:option display="Incremental Crawl">incremental</dxf:option>
+						<dxf:option display="None">none</dxf:option>
+					</fullRecovery>
+					
+					<incrementalRecovery display="Recover failed incremental crawl using"
+						type="pulldown" default="incremental">
+						<dxf:help>(ZooKeeper Failover) Action to do when recovering from a
+							failed incremental crawl.</dxf:help>
+						<dxf:option display="Incremental Crawl">incremental</dxf:option>
+						<dxf:option display="None">none</dxf:option>
+					</incrementalRecovery>					
+
+					<dxf:hr />
+          <dxf:alternatives subType="checkbox" display="Failed documents service" key="fdService" default="false">
+            <dxf:alternative display="Failed documents service" value="false">
+              <fdServiceUrl type="constant"/>
+            </dxf:alternative>
+            <dxf:alternative display="Failed documents service" value="true">
+              <fdServiceUrl display="URL" type="string" validations="required,url">
+                <dxf:help>The url of the service providing information about failed documents at the search engine. If configured
+                the service will be integrated at the start of each incremental crawl and the failed
+                documents resubmitted</dxf:help>
+              </fdServiceUrl>
+            </dxf:alternative>
+          </dxf:alternatives>
+				</dxf:alternative>
+			</dxf:alternatives>
+		</properties>
+
+	</contentSourceConfig>
+</dxf:template>
