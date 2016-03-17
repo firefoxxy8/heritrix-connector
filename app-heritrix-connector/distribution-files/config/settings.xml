@@ -54,7 +54,7 @@
           <id>stPublic</id>
           <url>http://repositories.searchtechnologies.com:8080/archiva/repository/public/</url>
           <user>stmaven</user>
-          <password>S34rchMav3n</password>
+          <password>##PASSWORD##</password>
         </remoteRepository>
       </remoteRepositories>
     </repository>
