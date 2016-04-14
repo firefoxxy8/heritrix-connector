@@ -13,6 +13,7 @@
  * limitations under the License.
  * 
  */
+
 package com.searchtechnologies.aspire.components.heritrixconnector;
 
 import java.io.File;
@@ -25,7 +26,6 @@ import java.util.PriorityQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.archive.crawler.framework.CrawlJob;
-import org.mapdb.*;
 
 import com.searchtechnologies.aspire.framework.Standards.Scanner.Action;
 import com.searchtechnologies.aspire.scanner.DSConnection;
@@ -176,15 +176,33 @@ public class HeritrixSourceInfo extends PushSourceInfo {
 
   private CrawlJob job;
 
-  private DB db;
-  
   private AtomicInteger itemsCrawled;
   
   private AtomicInteger itemsSkipped;
 
   private boolean rejectDefaults = true;
 
+  /**
+   * Maximum number of threads for Heritrix
+   */
+  private int maxHeritrixThreads = 3;
+  
+  /**
+   *  Queue assignment policy
+   */
+  private String queueAssignmentPolicy = "HostnameQueueAssignmentPolicy";
 
+  /**
+   * Number of queues when the HashingQueueAssignmentPolicy queue assignment policy is selected 
+   */
+  private int parallelQueues = -1;
+  
+  /**
+   * String to be passed to build the document to pass to the Heritrix engine with Number of queues for the HashingQueueAssignmentPolicy 
+   */
+  private String parallelQueuesString = "";
+  
+  
   /**
    * Gets the Queue of URLs ordered by time. (the top of the queue has the next to be processed to delete)
    * @return the Queue of URLs ordered by time
@@ -212,7 +230,7 @@ public class HeritrixSourceInfo extends PushSourceInfo {
    * Gets the URL db for this crawl
    * @return the URL db for this crawl
    */
-  public Map<String, String> getUrlDB() {
+  public Map<String, String> getIncrementalDB() {
     return urlMap;
   }
 
@@ -228,7 +246,7 @@ public class HeritrixSourceInfo extends PushSourceInfo {
    * Sets the url db for this crawl
    * @param map the url db for this crawl
    */
-  public void setUrlDB(Map<String, String> map) {
+  public void setIncrementalDB(Map<String, String> map) {
     this.urlMap = map;
   }
 
@@ -246,11 +264,8 @@ public class HeritrixSourceInfo extends PushSourceInfo {
    */
   public void closeUrlDB() throws AspireException{
 
-    if (getUrlDB() != null){
-      db.commit();
-      db.close();
-    }
-    setUrlDB(null);
+    //TODO: Commit for bulked maps
+    setIncrementalDB(null);
 
   }
 
@@ -260,13 +275,7 @@ public class HeritrixSourceInfo extends PushSourceInfo {
    */
   public void commitUrlDB() throws AspireException {
 
-    try{
-      if (getUrlDB() != null){
-        db.commit();
-      }  
-    }catch(Exception ioe){
-      getLogger().warn("Could not commit entries to the database %s", ioe);
-    }
+    //TODO: Commit for bulked maps
 
   }
 
@@ -287,24 +296,6 @@ public class HeritrixSourceInfo extends PushSourceInfo {
     
   }
 
-  public DB getDB() {
-    return db;
-  }
-  
-  public void createDB () {
-    File dbFile = new File(this.getUrlDir(),"urlDB");
-    if (!dbFile.exists()) {
-      dbFile.getParentFile().mkdirs();
-    }
-    db = DBMaker.newFileDB(dbFile)
-        .closeOnJvmShutdown()
-        .make();
-  }
-  
-  public void setDB(DB db) {
-    this.db = db;
-  }
-  
   /**
    * sets the queuedDocs
    * @param queuedDocs the queuedDocs to set
@@ -550,8 +541,8 @@ public class HeritrixSourceInfo extends PushSourceInfo {
    * Open the JDBM2 database and sets the urlDB. Uses the default filenames for the database 'jdbm2'.
    * @throws AspireException 
    */
-  protected Map<String,String> openUrlDB() throws AspireException {
-    return openDB("urlDB");
+  protected Map<String,String> openIncrementalDB() throws AspireException {
+    return openDB("snapshots");
   }
 
   /**
@@ -568,7 +559,7 @@ public class HeritrixSourceInfo extends PushSourceInfo {
    * @throws AspireException 
    */
   protected Map<String,String> openDB(String fname) throws AspireException{
-    return db.getHashMap(fname);
+    return this.getScanner().<String>getNoSQLMap(fname);
   }
 
   /**
@@ -701,5 +692,37 @@ public class HeritrixSourceInfo extends PushSourceInfo {
   
   public void setRejectDefaults(boolean reject) {
     rejectDefaults = reject;
+  }
+  
+  public int getmaxHeritrixThreads() {
+    return maxHeritrixThreads;
+  }
+  
+  public void setMaxHeritrixThreads(int value) {
+    maxHeritrixThreads = value;
+  }
+  
+  public String getQueueAssignmentPolicy() {
+    return queueAssignmentPolicy;
+  }
+  
+  public void setQueueAssignmentPolicy(String value) {
+    queueAssignmentPolicy = value;
+  }
+  
+  public int getParallelQueues() {
+    return parallelQueues;
+  }
+  
+  public void setParallelQueues(int value) {
+    parallelQueues = value;
+  }
+  
+  public String getParallelQueuesString() {
+    return parallelQueuesString;
+  }
+  
+  public void setParallelQueuesString(String value) {
+    parallelQueuesString = value;
   }
 }

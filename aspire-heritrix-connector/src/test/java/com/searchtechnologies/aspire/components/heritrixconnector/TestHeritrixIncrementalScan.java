@@ -105,7 +105,7 @@ public class TestHeritrixIncrementalScan extends TestCase {
     
     heritrixScanner.process(j);
     
-    Map<String,String> urlDB = heritrixScanner.getHeritrixSourceInfo().getUrlDB();
+    Map<String,String> urlDB = heritrixScanner.getHeritrixSourceInfo().getIncrementalDB();
     System.out.println("---------- The database contains "+urlDB.size()+" entries. ----------");
     for (String url : urlDB.keySet()){
       if (!"||status||".equals(url)){
@@ -140,7 +140,7 @@ public class TestHeritrixIncrementalScan extends TestCase {
     j.putVariable("deleteCount", new AtomicInteger(0));
     
     heritrixScanner.process(j);
-    urlDB = heritrixScanner.getHeritrixSourceInfo().getUrlDB();
+    urlDB = heritrixScanner.getHeritrixSourceInfo().getIncrementalDB();
     System.out.println("---------- (incremental) The database contains "+urlDB.size()+" entries. ----------");
     for (String url : urlDB.keySet()){
       if (!"||status||".equals(url)){
@@ -171,7 +171,7 @@ public class TestHeritrixIncrementalScan extends TestCase {
     j.putVariable("deleteCount", new AtomicInteger(0));
     
     heritrixScanner.process(j);
-    urlDB = heritrixScanner.getHeritrixSourceInfo().getUrlDB();
+    urlDB = heritrixScanner.getHeritrixSourceInfo().getIncrementalDB();
     System.out.println("---------- (incremental, delete) The database contains "+urlDB.size()+" entries. ----------");
     for (String url : urlDB.keySet()){
       if (!"||status||".equals(url)){
@@ -201,7 +201,7 @@ public class TestHeritrixIncrementalScan extends TestCase {
     j.putVariable("deleteCount", new AtomicInteger(0));
     
     heritrixScanner.process(j);
-    urlDB = heritrixScanner.getHeritrixSourceInfo().getUrlDB();
+    urlDB = heritrixScanner.getHeritrixSourceInfo().getIncrementalDB();
     System.out.println("---------- (incremental, delete) The database contains "+urlDB.size()+" entries. ----------");
     for (String url : urlDB.keySet()){
       if (!"||status||".equals(url)){
@@ -230,7 +230,7 @@ public class TestHeritrixIncrementalScan extends TestCase {
     
     heritrixScanner.process(j);
 
-    urlDB = heritrixScanner.getHeritrixSourceInfo().getUrlDB();
+    urlDB = heritrixScanner.getHeritrixSourceInfo().getIncrementalDB();
     System.out.println("---------- (incremental, delete) The database contains "+urlDB.size()+" entries. ----------");
     for (String url : urlDB.keySet()){
       if (!"||status||".equals(url)){
@@ -286,7 +286,7 @@ public class TestHeritrixIncrementalScan extends TestCase {
     j.putVariable("deleteCount", new AtomicInteger(0));
     
     heritrixScanner.process(j);
-    Map<String,String> urlDB = heritrixScanner.getHeritrixSourceInfo().getUrlDB();
+    Map<String,String> urlDB = heritrixScanner.getHeritrixSourceInfo().getIncrementalDB();
     System.out.println("---------- The database contains "+urlDB.size()+" entries. ----------");
     for (String url : urlDB.keySet()){
       if (!"||status||".equals(url)){
@@ -322,7 +322,7 @@ public class TestHeritrixIncrementalScan extends TestCase {
     j.putVariable("deleteCount", new AtomicInteger(0));
     
     heritrixScanner.process(j);
-    urlDB = heritrixScanner.getHeritrixSourceInfo().getUrlDB();
+    urlDB = heritrixScanner.getHeritrixSourceInfo().getIncrementalDB();
     System.out.println("---------- (incremental, delete) The database contains "+urlDB.size()+" entries. ----------");
     for (String url : urlDB.keySet()){
       if (!"||status||".equals(url)){
@@ -354,7 +354,7 @@ public class TestHeritrixIncrementalScan extends TestCase {
     j.putVariable("deleteCount", new AtomicInteger(0));
     
     heritrixScanner.process(j);
-    urlDB = heritrixScanner.getHeritrixSourceInfo().getUrlDB();
+    urlDB = heritrixScanner.getHeritrixSourceInfo().getIncrementalDB();
     System.out.println("---------- (incremental, delete) The database contains "+urlDB.size()+" entries. ----------");
     for (String url : urlDB.keySet()){
       if (!"||status||".equals(url)){

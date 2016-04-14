@@ -87,8 +87,25 @@
 							</dxf:attribute>
 						</reject>
 					</crawlPatterns>
-					<dxf:br />
+
+					<dxf:hr style="height: 1px;" />
 					
+					<maxHeritrixThreads display="Max Heritrix Threads" type="integer" default="3" min="1" max="25"
+						validations="required,integer">
+						<dxf:help>Maximum number of threads for the Heritrix engine.</dxf:help>
+					</maxHeritrixThreads>
+					
+					<dxf:alternatives subType="pulldown" display="Queue Assignment Policy" key="queueAssignmentPolicy" default="HostnameQueueAssignmentPolicy">
+						<dxf:help>Specify the queue assignment policy for this source.</dxf:help>
+						<dxf:alternative display="Hostname Queue Assignment Policy" value="HostnameQueueAssignmentPolicy">
+						</dxf:alternative>
+						<dxf:alternative display="Hashing Queue Assignment Policy" value="HashingQueueAssignmentPolicy">
+							<parallelQueues display="Number of Parallel Queues"
+								type="integer" default="5" min="1" max="25" validations="required,integer">
+								<dxf:help>Number of Parallel Queues.</dxf:help>
+							</parallelQueues>
+						</dxf:alternative>						
+					</dxf:alternatives>
 				</dxf:alternative>
 				<dxf:alternative display="Custom Configuration"
 					value="false">
@@ -99,6 +116,7 @@
 							This file will then be copied to Heritrix's Job Folder.
 						</dxf:help>
 					</configFileLocation>
+					<maxHeritrixThreads type="constant">3</maxHeritrixThreads>
 				</dxf:alternative>
 			</dxf:alternatives>
 			
@@ -194,6 +212,7 @@
 					<extractTimeout type="constant">180000</extractTimeout>
 					<workflowReloadPeriod type="constant">15s</workflowReloadPeriod>
 					<workflowErrorTolerant type="constant">false</workflowErrorTolerant>
+          <enable-non-text-filter type="constant">true</enable-non-text-filter>
 					<non-text-document type="constant">true</non-text-document>
 					<nonTextDocumentsExtensions type="constant">jpg,gif,png,tif,mp3,mp4,mpg,mpeg,avi,mkv,wav,bmp,swf,jar,war,rar,zip,tgz,dll,exe,class</nonTextDocumentsExtensions>
 					<enableFetchUrl type="constant">true</enableFetchUrl>
@@ -284,7 +303,7 @@
 						</dxf:help>
 					</jobQueue>
 					
-					<extractTimeout display="Extract Text Timeout" type="integer" default="180000" min="1" validations="integer">
+					<extractTimeout display="Extract Text Timeout" type="integer" default="180000" min="1" max="180000000" validations="integer">
 						<dxf:help>Maximum time to wait (in ms) for the text extraction</dxf:help>
 					</extractTimeout>
 					
@@ -341,38 +360,37 @@
 					
 					<dxf:hr />
 					
-					<dxf:h2>Non-Text Document Filtering</dxf:h2>
-					
-					<dxf:alternatives subType="pulldown"  display="Identify by" key="non-text-document"
-						default="true">
-						<dxf:alternative display="Extension list" value="true">
-							<nonTextDocumentsExtensions display="Non-text document extensions" validations="required"
-								type="string" placeholder="jpg,gif,mp3,mp4,mpg,avi,wav,bmp,swf"
-								default="jpg,gif,mp3,mp4,mpg,avi,wav,bmp,swf" style="width:350px;">
-								<dxf:help>Comma separated list of non-text document
-									extensions
-								</dxf:help>
-							</nonTextDocumentsExtensions>
-						</dxf:alternative>
-						<dxf:alternative display="Regex File" value="false">
-							<nonTextDocuments display="Non-Text regex list file"
-								type="string" placeholder="config/nonTextDocuments.txt" validations="path,required"
-								default="" style="width:350px;">
-								<dxf:help>Path to a file containing a list of regex that
-									matches the non-text documents, one regex expression per
-									line
-								</dxf:help>
-							</nonTextDocuments>
-						</dxf:alternative>
-					</dxf:alternatives>
-					
-					<enableFetchUrl display="Open Data Stream"
-						type="boolean" default="true">
-						<dxf:help>Select if you want the non-text documents to open an
-							input stream of the data
-						</dxf:help>
-					</enableFetchUrl>
 
+          <dxf:alternatives subType="checkbox" display="Enable Non-Text Document filtering"
+           key="enable-non-text-filter" default="true">
+           <dxf:alternative display="True" value="true">
+							<dxf:h2>Non-Text Document Filtering</dxf:h2>
+
+							<dxf:alternatives subType="pulldown" display="Identify by" key="non-text-document" default="true">
+								<dxf:alternative display="Extension list" value="true">
+									<nonTextDocumentsExtensions display="Non-text document extensions" type="string" validations="required"
+										placeholder="jpg,jpeg,gif,mp3,mp4,mpg,avi,wav,bmp,swf" default="jpg,jpeg,gif,mp3,mp4,mpg,avi,wav,bmp,swf" style="width:350px;">
+										<dxf:help>Comma separated list of non-text document
+											extensions</dxf:help>
+									</nonTextDocumentsExtensions>
+								</dxf:alternative>
+								<dxf:alternative display="Regex File" value="false">
+									<nonTextDocuments display="Non-Text regex list file" type="string" placeholder="config/nonTextDocuments.txt"
+										validations="path,required" default="" style="width:350px;">
+										<dxf:help>Path to a file containing a list of regex that
+											matches the non-text documents, one regex expression per
+											line</dxf:help>
+									</nonTextDocuments>
+								</dxf:alternative>
+              </dxf:alternatives>
+              <enableFetchUrl display="Open Data Stream" type="boolean" default="true">
+                <dxf:help>Select if you want the non-text documents to open an
+                  input stream of the data</dxf:help>
+              </enableFetchUrl>
+            </dxf:alternative>
+            <dxf:alternative display="False" value="false">
+            </dxf:alternative>
+          </dxf:alternatives>
 					<dxf:hr />
 					
 					<dxf:h2>Recovery Policy</dxf:h2>

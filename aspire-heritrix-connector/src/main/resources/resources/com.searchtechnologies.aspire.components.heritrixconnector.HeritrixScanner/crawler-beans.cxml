@@ -421,7 +421,7 @@ ${heritrixSeedUrl}
  <!-- CRAWLCONTROLLER: Control interface, unifying context -->
  <bean id="crawlController" 
    class="org.archive.crawler.framework.CrawlController">
-  <!-- <property name="maxToeThreads" value="25" /> -->
+  <property name="maxToeThreads" value="${maxHeritrixThreads}" />
   <!-- <property name="pauseAtStart" value="true" /> -->
   <!-- <property name="runWhileEmpty" value="false" /> -->
   <!-- <property name="recorderInBufferBytes" value="524288" /> -->
@@ -603,14 +603,11 @@ ${heritrixSeedUrl}
  
 
  <!-- QUEUE ASSIGNMENT POLICY -->
- <!--
- <bean id="queueAssignmentPolicy" 
-   class="org.archive.crawler.frontier.SurtAuthorityQueueAssignmentPolicy">
-  <property name="forceQueueAssignment" value="" />
-  <property name="deferToPrevious" value="true" />
-  <property name="parallelQueues" value="1" />
- </bean>
- -->
+ 
+ <bean id="queueAssignmentPolicy"
+   class="org.archive.crawler.frontier.${queueAssignmentPolicy}">
+   ${xml:parallelQueuesString}
+ </bean> 
  
  <!-- URI PRECEDENCE POLICY -->
  <!--

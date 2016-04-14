@@ -13,6 +13,7 @@
  * limitations under the License.
  * 
  */
+
 package com.searchtechnologies.aspire.components.heritrixconnector;
 
 import java.io.BufferedReader;
@@ -187,7 +188,28 @@ public class HeritrixScanner extends AbstractPushScanner {
    * Heritrix interval (in minutes) for checkpoints
    */
   private int checkpointIntervalMinutes;
+  
+  /**
+   * Maximum number of threads for Heritrix
+   */
+  private int maxHeritrixThreads = 3;
+  
+  /**
+   *  Queue assignment policy
+   */
+  private String queueAssignmentPolicy = "HostnameQueueAssignmentPolicy";
 
+  /**
+   * Number of queues when the HashingQueueAssignmentPolicy queue assignment policy is selected 
+   */
+  private int parallelQueues = -1;
+  
+  /**
+   * String to be passed to build the document to pass to the Heritrix engine with Number of queues for the HashingQueueAssignmentPolicy 
+   */
+  private String parallelQueuesString = "";
+  
+  
   boolean stop = false;
   boolean paused = false;
   
@@ -202,10 +224,9 @@ public class HeritrixScanner extends AbstractPushScanner {
     
     info.setUrlDir(mapDBDir+"/urlDB-Test");
     
-    info.createDB();
-    info.setUrlDB(info.openUrlDB());
+    info.setIncrementalDB(info.openIncrementalDB());
     
-    info.getUrlDB().clear();
+    info.getIncrementalDB().clear();
     info.commitUrlDB();
     
     crawl(info);
@@ -215,7 +236,7 @@ public class HeritrixScanner extends AbstractPushScanner {
   public void doCrawl(PushSourceInfo si) throws AspireException{
     HeritrixSourceInfo info = (HeritrixSourceInfo)si;
     if (si.fullCrawl()) {
-      info.getUrlDB().clear();
+      info.getIncrementalDB().clear();
       info.commitUrlDB();
     }
     info.setItemsToSkip(0);
@@ -356,7 +377,7 @@ public class HeritrixScanner extends AbstractPushScanner {
       }
       job.teardown();
 
-      info.getUrlDB().put("||status||", HeritrixSourceInfo.INITIAL_CRAWL_COMPLETE+","+info.getStartCrawlTime().getTime());
+      info.getIncrementalDB().put("||status||", HeritrixSourceInfo.INITIAL_CRAWL_COMPLETE+","+info.getStartCrawlTime().getTime());
 
       try {
         if (info.getStatus()==HeritrixSourceInfo.SCAN_START) {
@@ -408,13 +429,13 @@ public class HeritrixScanner extends AbstractPushScanner {
 
     if (lastFile!=null && !info.fullCrawl() && (job.getCheckpointService()!=null)){
       job.getCheckpointService().setRecoveryCheckpointByName(lastFile.getName());
-      String statusData = info.getUrlDB().get("||status||");
+      String statusData = info.getIncrementalDB().get("||status||");
 
       if (statusData!=null) //if there is no status on the database it means it is empty.
         info.setStartCrawlTime(new Date(Long.parseLong(statusData.split(",")[1])));
     }
 
-    info.getUrlDB().put("||status||", HeritrixSourceInfo.INITIAL_CRAWL_STARTED+","+info.getStartCrawlTime().getTime());
+    info.getIncrementalDB().put("||status||", HeritrixSourceInfo.INITIAL_CRAWL_STARTED+","+info.getStartCrawlTime().getTime());
     info.commitUrlDB();
   }
 
@@ -457,6 +478,9 @@ public class HeritrixScanner extends AbstractPushScanner {
       heritrixConfigProperties.put("checkpointIntervalMinutes", String.valueOf(info.getCheckpointIntervalMinutes()));
       heritrixConfigProperties.put("retryDelay", String.valueOf(info.getRetryDelay()));
       heritrixConfigProperties.put("maxRetries", String.valueOf(info.getMaxRetries()));
+      heritrixConfigProperties.put("maxHeritrixThreads", String.valueOf(info.getmaxHeritrixThreads()));
+      heritrixConfigProperties.put("queueAssignmentPolicy", info.getQueueAssignmentPolicy());
+      heritrixConfigProperties.put("parallelQueuesString", info.getParallelQueuesString());
 
       e = PropertyUtilities.substitutePropertiesInElement(heritrixConfigProperties, e);
       AXML.write(e, jobConfigFile, true);
@@ -533,8 +557,8 @@ public class HeritrixScanner extends AbstractPushScanner {
     if (!Thread.currentThread().getContextClassLoader().equals(CrawlJob.class.getClassLoader())) {
       Thread.currentThread().setContextClassLoader(CrawlJob.class.getClassLoader());
     }
-
-    HeritrixSourceInfo info = loadCfgFromJob(propertiesXml);
+    
+    HeritrixSourceInfo info = loadCfgFromJob(propertiesXml);    
 
     //Check if the custom file exists, if not throws an error before starting the Heritrix engine
     if (!defaultConfigFile && ((StringUtilities.isNotEmpty(configFileLocation) 
@@ -592,7 +616,7 @@ public class HeritrixScanner extends AbstractPushScanner {
     scope = getStringFromConfig(config,"scope", scope);
 
     updaterComponentName = getStringFromConfig(config, "updaterComponent", null);
-
+    
     if (StringUtilities.isNotEmpty(updaterComponentName)) {
       info("Using updater job component: %s", updaterComponentName);
     }
@@ -706,10 +730,36 @@ public class HeritrixScanner extends AbstractPushScanner {
         if (temp!=null && !temp.isEmpty() && !"-1".equals(temp))
           maxRetries = Integer.parseInt(temp);
       }
-
+      
       temp = propertiesXml.getText("cleanupRegex");
       if (temp!=null && !temp.isEmpty()){
         cleanupRegex = temp;
+      }
+      
+      temp = "-1";
+      temp = propertiesXml.getText("maxHeritrixThreads", "-1");
+      if (temp!=null && !temp.isEmpty() && !"-1".equals(temp)){
+        maxHeritrixThreads = Integer.parseInt(temp);
+      }
+      
+      temp = queueAssignmentPolicy = propertiesXml.getText("queueAssignmentPolicy");
+      if (temp!=null && !temp.isEmpty()){
+        queueAssignmentPolicy = temp;
+        
+        if (temp.equalsIgnoreCase("HashingQueueAssignmentPolicy"))
+        {
+          temp = "-1";
+          temp = propertiesXml.getText("parallelQueues", "-1");
+          if (temp!=null && !temp.isEmpty() && !"-1".equals(temp)){
+            parallelQueues = Integer.parseInt(temp);
+            parallelQueuesString = String.format("<property xmlns=\"http://www.springframework.org/schema/beans\" name=\"parallelQueues\" value=\"%s\" />", parallelQueues);
+          }            
+        }
+        else
+        {
+          parallelQueues = -1;
+          parallelQueuesString = "";
+        }
       }
     }
 
@@ -757,29 +807,28 @@ public class HeritrixScanner extends AbstractPushScanner {
     info.setRetryDelay(retryDelay);
     info.setMaxRetries(maxRetries);
     info.setCleanupRegex(cleanupRegex);
-
+    
     info.setUrlDir(mapDBDir+"/urlDB");
     
     if (this.info != null && 
-        ((HeritrixSourceInfo)this.info).getUrlDB() != null &&
+        ((HeritrixSourceInfo)this.info).getIncrementalDB() != null &&
         !this.info.isTestMode()
         && ((HeritrixSourceInfo)this.info).getUrlDir().equals(info.getUrlDir())) {
       
-      info.setDB(((HeritrixSourceInfo)this.info).getDB());
-      info.setUrlDB(((HeritrixSourceInfo)this.info).getUrlDB());
+      info.setIncrementalDB(((HeritrixSourceInfo)this.info).getIncrementalDB());
       
     } else { 
-      try {
-        info.createDB();
-      } catch (Throwable e) {
-        throw new AspireException(this,"HeritrixScanner.MapDB.initializationError",e,"Error initializing MapDB files");
-      }
-      info.setUrlDB(info.openUrlDB());
+      info.setIncrementalDB(info.openIncrementalDB());
     }
     
     info.setDaysFailedThreshold(daysFailedThreshold);
     info.setMaxFailures(maxFailures);
     info.setCheckNotCrawlable(checkNotCrawlableContent);
+    
+    info.setMaxHeritrixThreads(maxHeritrixThreads);
+    info.setQueueAssignmentPolicy(queueAssignmentPolicy);
+    info.setParallelQueues(parallelQueues);
+    info.setParallelQueuesString(parallelQueuesString);
 
     return info;
   }
@@ -807,12 +856,13 @@ public class HeritrixScanner extends AbstractPushScanner {
     item.setConnectorSpecificField("xslt", xslt);
     item.setConnectorSpecificField("discoveredBy", parent);
     item.setConnectorSpecificField("pathFromSeed", pathFromSeed);
+    item.setSourceId(info.getContentSourceId());
     
     boolean addOnIncremental = false;
 
     if (!info.fullCrawl()) {
       DataBaseURLEntry value=null;
-      String data = info.getUrlDB().get(uri);
+      String data = info.getIncrementalDB().get(uri);
       if (data != null){
         value = DataBaseURLEntry.createDataBaseURLEntryFromString(data);
       }
@@ -829,7 +879,7 @@ public class HeritrixScanner extends AbstractPushScanner {
     }
     
     synchronized (this.getClass()){
-      info.getUrlDB().put(uri, new DataBaseURLEntry(info.getStartCrawlTime(),null,0,md5,new Date()).toString());
+      info.getIncrementalDB().put(uri, new DataBaseURLEntry(info.getStartCrawlTime(),null,0,md5,new Date()).toString());
 
       if (commitDB){ //Commits every 100 writes.
         info.commitUrlDB();
@@ -883,10 +933,10 @@ public class HeritrixScanner extends AbstractPushScanner {
     info.commitUrlDB();
 
 
-    if (HeritrixSourceInfo.INITIAL_CRAWL_COMPLETE.equals(info.getUrlDB().get("||status||").split(",")[0])){
+    if (HeritrixSourceInfo.INITIAL_CRAWL_COMPLETE.equals(info.getIncrementalDB().get("||status||").split(",")[0])){
 
       /* Contains the all the Entries on the database */
-      Iterator<Entry<String,String>> iter = info.getUrlDB().entrySet().iterator();
+      Iterator<Entry<String,String>> iter = info.getIncrementalDB().entrySet().iterator();
       //Writes uncrawled urls to files by its host name
       HashMap<String,BufferedWriter> files = new HashMap<String,BufferedWriter>();
       long commitDB = 0;
@@ -933,7 +983,7 @@ public class HeritrixScanner extends AbstractPushScanner {
         }
         while (info.getStatus()==HeritrixSourceInfo.SCAN_PAUSED);
       }
-      info.getUrlDB().put("||status||", HeritrixSourceInfo.TEMP_UNCRAWLED_DB_CREATED+","+info.getStartCrawlTime().getTime());
+      info.getIncrementalDB().put("||status||", HeritrixSourceInfo.TEMP_UNCRAWLED_DB_CREATED+","+info.getStartCrawlTime().getTime());
       info.commitUrlDB();
       for (BufferedWriter bw : files.values()){
         bw.flush();
@@ -982,7 +1032,7 @@ public class HeritrixScanner extends AbstractPushScanner {
     }else if (info.getStatus()==HeritrixSourceInfo.SCAN_STOPPED){
       info.getTempUncrawledDB().clear();
       info.commitUrlDB();
-    }else if (HeritrixSourceInfo.TEMP_UNCRAWLED_DB_CREATED.equals(info.getUrlDB().get("||status||").split(",")[0])){
+    }else if (HeritrixSourceInfo.TEMP_UNCRAWLED_DB_CREATED.equals(info.getIncrementalDB().get("||status||").split(",")[0])){
       info.commitUrlDB();
     }
 
@@ -1105,21 +1155,21 @@ public class HeritrixScanner extends AbstractPushScanner {
 
       status.push("contentSourcesDB");
   
-      if (info.getUrlDB()!=null){
+      if (info.getIncrementalDB()!=null){
         status.push("database");
         //status.setAttribute("id", ""+info.getDatabaseId());
         status.add("friendlyName",info.getFriendlyName());
         status.add("urlAdded",info.getDocsAdded());
         status.add("urlUpdated",info.getDocsUpdated());
-        status.add("revisitRate",(info.getDocsUpdated()+0.0)/((info.getUrlDB().size()-1)+info.getDocsDeleted()+0.0));
+        status.add("revisitRate",(info.getDocsUpdated()+0.0)/((info.getIncrementalDB().size()-1)+info.getDocsDeleted()+0.0));
         status.add("urlDeleted",info.getDocsDeleted());
-        status.add("size", info.getUrlDB().size()-1);
+        status.add("size", info.getIncrementalDB().size()-1);
         status.add("directory",info.getUrlDir());
   
         HashMap<String,MutableInt> hostCount = new HashMap<String,MutableInt>(); 
         HashMap<String,MutableInt> lastHostCount = new HashMap<String,MutableInt>();
         long now = new Date().getTime();
-        for (String url : info.getUrlDB().keySet()){
+        for (String url : info.getIncrementalDB().keySet()){
           String hostname = null;
           if (url.equals("||status||"))
             continue;
@@ -1128,7 +1178,7 @@ public class HeritrixScanner extends AbstractPushScanner {
           } catch (MalformedURLException e) {
             throw new AspireException("com.searchtechnologies.aspire.components.heritrixconnector.HeritrixScanner",e,"Error getting hostname for url: %s",url);
           }
-          DataBaseURLEntry data =  DataBaseURLEntry.createDataBaseURLEntryFromString(info.getUrlDB().get(url));
+          DataBaseURLEntry data =  DataBaseURLEntry.createDataBaseURLEntryFromString(info.getIncrementalDB().get(url));
           if (hostCount.containsKey(hostname)){
             hostCount.get(hostname).increment();
           }else{
@@ -1283,7 +1333,7 @@ public class HeritrixScanner extends AbstractPushScanner {
     String url = jobData.getText(Standards.Basic.FETCH_URL_TAG);
 
     if ("true".equals(jobData.getText("uncrawled"))){
-      DataBaseURLEntry dbEntry = DataBaseURLEntry.createDataBaseURLEntryFromString(info.getUrlDB().get(url));
+      DataBaseURLEntry dbEntry = DataBaseURLEntry.createDataBaseURLEntryFromString(info.getIncrementalDB().get(url));
       dbEntry.setUrl(url);
 
 
@@ -1307,7 +1357,7 @@ public class HeritrixScanner extends AbstractPushScanner {
             dbEntry.setDateFirstFailed(info.getStartCrawlTime());
 
           //Remove from JDBM2
-          info.getUrlDB().remove(url);
+          info.getIncrementalDB().remove(url);
 
           //Add to "deleted URLs" log file
           deletedUrlsLog.writeToFile("DELETED: %s LastAccessedTime: %s DateFirstFailed: %s Fail-Count: %d MD5Sum: %s",
@@ -1327,7 +1377,7 @@ public class HeritrixScanner extends AbstractPushScanner {
         if (dbEntry.getDateFirstFailed()==null)
           dbEntry.setDateFirstFailed(info.getStartCrawlTime());
         
-        info.getUrlDB().put(url, dbEntry.toString());
+        info.getIncrementalDB().put(url, dbEntry.toString());
 
         //Add to "failed URLs" log file
         failedUrlsLog.writeToFile("FAILED: %s LastAccessedTime: %s DateFirstFailed: %s Fail-Count: %d MD5Sum: %s",
@@ -1344,7 +1394,7 @@ public class HeritrixScanner extends AbstractPushScanner {
         dbEntry.setDateFirstFailed(null);
         dbEntry.setMd5Sum(jobData.getText("md5"));
 
-        info.getUrlDB().put(url, dbEntry.toString());
+        info.getIncrementalDB().put(url, dbEntry.toString());
         info.incrementDocsUpdated();
         
         super.processEvent(pe);
@@ -1355,7 +1405,7 @@ public class HeritrixScanner extends AbstractPushScanner {
         dbEntry.setDateFirstFailed(null);
         dbEntry.setMd5Sum(jobData.getText("md5"));
 
-        info.getUrlDB().put(url, dbEntry.toString());
+        info.getIncrementalDB().put(url, dbEntry.toString());
       }
       else{
         super.processEvent(pe);
@@ -1426,12 +1476,6 @@ public class HeritrixScanner extends AbstractPushScanner {
       throws AspireException {
     // Nothing to do
     return false;
-  }
-
-  @Override
-  public InputStream performFetchForZip(SourceItem si) throws AspireException {
-    // TODO Auto-generated method stub
-    return null;
   }
 }
 

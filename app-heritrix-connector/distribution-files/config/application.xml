@@ -111,6 +111,9 @@
 						<branch event="onCrawlEnd" pipelineManager="../ProcessPipelineManager"
 							pipeline="crawlStartEndPipeline" allowRemote="true" />
 					</branches>
+					<maxHeritrixThreads>${maxHeritrixThreads}</maxHeritrixThreads>
+					<queueAssignmentPolicy>${queueAssignmentPolicy}</queueAssignmentPolicy>
+					<parallelQueues>${parallelQueues}</parallelQueues>
 				</component>
 			</components>
 		</component>
@@ -233,6 +236,8 @@
         <component name="DetectNonTextDocuments" subType="default" factoryName="aspire-groovy">
           <debug>${debug}</debug>
           <variable name="nonTextDocumentsExtensions"><![CDATA[
+              if (!${enable-non-text-filter}) 
+                return null;
               if (!${non-text-document})
                 return null;
               def ext = "";
@@ -246,6 +251,8 @@
               return "${nonTextDocumentsExtensions}".toUpperCase().split(",")
           ]]></variable>
           <variable name="regexList"><![CDATA[
+              if (!${enable-non-text-filter}) 
+                return null;
               if (${non-text-document})
                 return null;
               def file = new File($/${nonTextDocuments}/$)
@@ -263,9 +270,15 @@
                 component.warn("There are no regex inside of the "+file+" file");
               return regexList;
               ]]></variable>
-          <variable name="useExtensions">return ${non-text-document}</variable>
+            <variable name="useExtensions"><![CDATA[
+              if (!${enable-non-text-filter}) 
+                return null;
+              return ${non-text-document}
+              ]]></variable>
           <script>
             <![CDATA[
+            if (!${enable-non-text-filter}) 
+              return;
               if (useExtensions) {
                 for (ext in nonTextDocumentsExtensions) {
                   if (doc.url.text().toUpperCase().endsWith("."+ext)) {

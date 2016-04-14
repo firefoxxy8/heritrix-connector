@@ -13,6 +13,7 @@
  * limitations under the License.
  * 
  */
+
 package com.searchtechnologies.aspire.components.heritrixconnector;
 
 import java.util.Date;
@@ -114,7 +115,7 @@ public class PriorityQueueChecker implements Runnable {
                 //The maximum days of fail count was reached, we have to delete it.
                 scanner.deleteAction(item, info);
                 
-                info.getUrlDB().remove(item.getUrl());
+                info.getIncrementalDB().remove(item.getUrl());
                 
               } else { //We don't have to do anything, just update the logs and database 
                 
@@ -128,7 +129,7 @@ public class PriorityQueueChecker implements Runnable {
                 info.getLogger().debug("Uncrawled url: %s updated to %d. Date of first failed: %s",entry.getUrl(),entry.getFailCount(),DateTimeUtilities.getISO8601Date(entry.getDateFirstFailed()));
                 
                 //Update database
-                info.getUrlDB().put(entry.getUrl(), entry.toString());
+                info.getIncrementalDB().put(entry.getUrl(), entry.toString());
 
                 //Add to "failed URLs" log file
                 scanner.failedUrlsLog.writeToFile("FAILED: %s LastAccessedTime: %s DateFirstFailed: %s Fail-Count: %d MD5Sum: %s",

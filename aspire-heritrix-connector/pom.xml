@@ -21,7 +21,7 @@
   <groupId>com.searchtechnologies.aspire</groupId>
   <artifactId>aspire-heritrix-connector</artifactId>
   <packaging>bundle</packaging>
-  <version>2.2.2</version>
+  <version>3.0-SNAPSHOT</version>
   <name>Aspire Heritrix Connector</name>
   <description>Heritrix Scanner for Aspire</description>
   <url>http://www.searchtechnologies.com</url>
@@ -38,7 +38,7 @@
         <dependency>
           <groupId>com.searchtechnologies.aspire</groupId>
           <artifactId>aspire-core</artifactId>
-          <version>2.2-SNAPSHOT</version>
+          <version>3.0-SNAPSHOT</version>
           <scope>provided</scope>
         </dependency>
       </dependencies>
@@ -125,11 +125,14 @@
               com.searchtechnologies.aspire.framework.utilities;-split-package:=first,
               com.searchtechnologies.aspire.framework.logging;-split-package:=first,
               com.searchtechnologies.aspire.framework.auditing;-split-package:=first,
+              com.searchtechnologies.aspire.framework.noSql;-split-package;=first, 
+              com.searchtechnologies.aspire.framework.noSql;-split-package:=first, 
               {local-packages};-split-package:=first
             </Private-Package>
             <Import-Package>
               com.searchtechnologies.aspire.services,
               com.searchtechnologies.aspire.services.xml,
+              com.searchtechnologies.aspire.services.noSql,
               com.searchtechnologies.aspire.services.json,
               com.searchtechnologies.aspire.services.events,
               com.searchtechnologies.aspire.services.logging,
@@ -137,6 +140,7 @@
               com.searchtechnologies.aspire.services.distributed,
               com.searchtechnologies.aspire.services.groupexpansion,
               com.searchtechnologies.aspire.services.groupexpansion.ldap,
+              com.searchtechnologies.aspire.services.noSql,
               com.searchtechnologies.aspire.groupexpansion,
               com.searchtechnologies.aspire.groupexpansion.cache,
               com.searchtechnologies.aspire.groupexpansion.cache.impl,
@@ -306,7 +310,14 @@
               !com.searchtechnologies.aspire.services.contentrepository,
               !com.searchtechnologies.aspire.jms,
               !com.searchtechnologies.aspire.jms.contentrepository,
-              !javax.jms
+              !javax.jms,
+              
+              !javax.mail, 
+              !jline, 
+              !org.apache.log4j, 
+              !org.apache.log4j.xml, 
+              !org.fusesource.jansi, 
+              !org.mortbay.jetty.ajp
             </Import-Package>
             <Embed-Transitive>true</Embed-Transitive>
             <Embed-Dependency>!aspire-framework,*;scope=compile</Embed-Dependency>
@@ -318,6 +329,37 @@
         </configuration>
       </plugin>
     </plugins>
+    <pluginManagement>
+    	<plugins>
+    		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+    		<plugin>
+    			<groupId>org.eclipse.m2e</groupId>
+    			<artifactId>lifecycle-mapping</artifactId>
+    			<version>1.0.0</version>
+    			<configuration>
+    				<lifecycleMappingMetadata>
+    					<pluginExecutions>
+    						<pluginExecution>
+    							<pluginExecutionFilter>
+    								<groupId>org.codehaus.mojo</groupId>
+    								<artifactId>
+    									license-maven-plugin
+    								</artifactId>
+    								<versionRange>[1.6,)</versionRange>
+    								<goals>
+    									<goal>download-licenses</goal>
+    								</goals>
+    							</pluginExecutionFilter>
+    							<action>
+    								<ignore></ignore>
+    							</action>
+    						</pluginExecution>
+    					</pluginExecutions>
+    				</lifecycleMappingMetadata>
+    			</configuration>
+    		</plugin>
+    	</plugins>
+    </pluginManagement>
   </build>
   <dependencies>
     <!-- OSGI -->
@@ -338,7 +380,7 @@
     <dependency>
       <groupId>com.searchtechnologies.aspire</groupId>
       <artifactId>aspire-services</artifactId>
-      <version>2.2.2</version>
+      <version>3.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
 
@@ -346,7 +388,7 @@
     <dependency>
       <groupId>com.searchtechnologies.aspire</groupId>
       <artifactId>aspire-framework</artifactId>
-      <version>2.2.2</version>
+      <version>3.0-SNAPSHOT</version>
     </dependency>
 
     <!-- TESTING -->
@@ -359,7 +401,7 @@
     <dependency>
       <groupId>com.searchtechnologies.aspire</groupId>
       <artifactId>aspire-application</artifactId>
-      <version>2.2.2</version>
+      <version>3.0-SNAPSHOT</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -490,13 +532,6 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>com.anotherbigidea</groupId>
-      <artifactId>javaswf</artifactId>
-      <version>SNAPSHOT-1</version>
-      <type>jar</type>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
       <version>3.2.3</version>
@@ -555,13 +590,13 @@
     <dependency>
       <groupId>com.searchtechnologies.aspire</groupId>
       <artifactId>aspire-ctb</artifactId>
-      <version>2.2.2</version>
+      <version>3.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.searchtechnologies.aspire</groupId>
       <artifactId>aspire-test</artifactId>
-      <version>2.2.2</version>
+      <version>3.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -580,7 +615,7 @@
     <dependency>
       <groupId>com.searchtechnologies.aspire</groupId>
       <artifactId>aspire-fetch-url</artifactId>
-      <version>2.2.2</version>
+      <version>3.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -596,19 +631,26 @@
     <dependency>
       <groupId>com.searchtechnologies.aspire</groupId>
       <artifactId>aspire-scanner</artifactId>
-      <version>2.2.2</version>
+      <version>3.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.searchtechnologies.aspire</groupId>
       <artifactId>aspire-simple-group-expander</artifactId>
-      <version>2.2.2</version>
+      <version>3.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>org.mapdb</groupId>
-      <artifactId>mapdb</artifactId>
-      <version>1.0.7</version>
-    </dependency>
+	<dependency>
+		<groupId>org.dnsjava</groupId>
+		<artifactId>dnsjava</artifactId>
+		<version>2.0.6</version>
+		<scope>compile</scope>
+	</dependency>
+	<dependency>
+		<groupId>com.anotherbigidea</groupId>
+		<artifactId>javaswf</artifactId>
+		<version>1-SNAPSHOT</version>
+		<scope>compile</scope>
+	</dependency> 		
   </dependencies>
   <distributionManagement>
     <repository>
@@ -616,4 +658,9 @@
       <url>${stPublicUrl}</url>
     </repository>
   </distributionManagement>
+  <dependencyManagement>
+  	<dependencies>
+  		
+  	</dependencies>
+  </dependencyManagement>
 </project>

@@ -13,6 +13,7 @@
  * limitations under the License.
  * 
  */
+
 package com.searchtechnologies.aspire.components.heritrixconnector;
 
 import java.util.ArrayList;
