@@ -125,14 +125,12 @@
               com.searchtechnologies.aspire.framework.utilities;-split-package:=first,
               com.searchtechnologies.aspire.framework.logging;-split-package:=first,
               com.searchtechnologies.aspire.framework.auditing;-split-package:=first,
-              com.searchtechnologies.aspire.framework.noSql;-split-package;=first, 
-              com.searchtechnologies.aspire.framework.noSql;-split-package:=first, 
+              com.searchtechnologies.aspire.framework.noSql;-split-package;=first,
               {local-packages};-split-package:=first
             </Private-Package>
             <Import-Package>
               com.searchtechnologies.aspire.services,
               com.searchtechnologies.aspire.services.xml,
-              com.searchtechnologies.aspire.services.noSql,
               com.searchtechnologies.aspire.services.json,
               com.searchtechnologies.aspire.services.events,
               com.searchtechnologies.aspire.services.logging,
