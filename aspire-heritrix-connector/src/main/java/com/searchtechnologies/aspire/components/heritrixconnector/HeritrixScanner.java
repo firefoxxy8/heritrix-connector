@@ -818,7 +818,12 @@ public class HeritrixScanner extends AbstractPushScanner {
       info.setIncrementalDB(((HeritrixSourceInfo)this.info).getIncrementalDB());
       
     } else { 
-      info.setIncrementalDB(info.openIncrementalDB());
+      try {
+        info.setIncrementalDB(info.openIncrementalDB());
+      } catch (AspireException ae) {
+        error(ae, "Error openning NoSQL Connection, using in-memory Incremental Database!, Please check your NoSQL Settings or server");
+        info.setIncrementalDB(new HashMap<String, String>());
+      }
     }
     
     info.setDaysFailedThreshold(daysFailedThreshold);

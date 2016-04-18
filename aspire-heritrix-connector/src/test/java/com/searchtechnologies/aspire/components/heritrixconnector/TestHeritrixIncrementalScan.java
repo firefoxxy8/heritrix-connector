@@ -16,6 +16,7 @@
 
 package com.searchtechnologies.aspire.components.heritrixconnector;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -39,6 +40,8 @@ import com.searchtechnologies.aspire.services.ServiceUtils;
 import com.searchtechnologies.aspire.test.UnitTestHelper;
 
 import junit.framework.TestCase;
+import mockit.Mock;
+import mockit.MockUp;
 
 /**
  * Test incremental scan
@@ -51,9 +54,12 @@ public class TestHeritrixIncrementalScan extends TestCase {
   HeritrixScanner heritrixScanner = null;
   protected Server server;
   String baseUrl = "http://localhost:8888";
-
+  HashMap<String, String> incMap = new HashMap<String, String>();
+  HashMap<String, String> failedMap = new HashMap<String, String>();
+  
   protected void setUp() throws Exception {
     super.setUp();
+    new MockHeritrixSourceInfo();
     FileUtilities.delete(uth.getSourceFile("testHeritrixIncrementalScan/data"));
     FileUtilities.delete(uth.getSourceFile("testHeritrixIncrementalScan/heritrixJobs"));
     startServlet();
@@ -390,5 +396,15 @@ public class TestHeritrixIncrementalScan extends TestCase {
   public void stopServlet() throws Exception{
     System.out.println("Stopping");
     server.stop();
+  }
+  
+  private class MockHeritrixSourceInfo extends MockUp<HeritrixSourceInfo> {
+    @Mock
+    public Map<String, String> openDB(String name) {
+      if (name.equals("snapshots"))
+        return incMap;
+      else
+        return failedMap;
+    }
   }
 }
