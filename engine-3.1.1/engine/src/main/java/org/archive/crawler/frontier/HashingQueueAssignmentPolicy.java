@@ -38,6 +38,6 @@ implements HasKeyedProperties {
     @Override
     public String getClassKey(CrawlURI curi) {
         int queueNumber = curi.hashCode() % getParallelQueues();
-        return "queue+"+queueNumber;
+        return "queue+"+Math.abs(queueNumber);
     }
 }

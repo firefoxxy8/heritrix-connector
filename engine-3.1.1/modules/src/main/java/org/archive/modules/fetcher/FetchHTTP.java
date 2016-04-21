@@ -108,6 +108,8 @@ import org.archive.httpclient.ConfigurableX509TrustManager.TrustLevel;
 import org.archive.httpclient.HttpRecorderGetMethod;
 import org.archive.httpclient.HttpRecorderMethod;
 import org.archive.httpclient.HttpRecorderPostMethod;
+import org.archive.httpclient.SingleHttpConnectionManager;
+import org.archive.httpclient.ThreadLocalHttpConnectionManager;
 import org.archive.io.RecorderLengthExceededException;
 import org.archive.io.RecorderTimeoutException;
 import org.archive.io.RecorderTooMuchHeaderException;
@@ -273,6 +275,16 @@ public class FetchHTTP extends Processor implements Lifecycle {
     }
     public void setAcceptHeaders(List<String> headers) {
         kp.put("acceptHeaders",headers);
+    }
+   
+    {
+      setConnectionManager("default");
+    }
+    public String getConnectionManager() {
+      return (String)kp.get("connectionManager"); 
+    }
+    public void setConnectionManager(String connManager) {
+      kp.put("connectionManager", connManager);
     }
     
     /**
@@ -1783,10 +1795,18 @@ public class FetchHTTP extends Processor implements Lifecycle {
         // Get timeout. Use it for socket and for connection timeout.
         int timeout = (soTimeout > 0) ? soTimeout : 0;
 
-        HttpConnectionManager cm = new MultiThreadedHttpConnectionManager();
-         //new ThreadLocalHttpConnectionManager();
-        //HttpConnectionManager cm = new SingleHttpConnectionManager();
-        //HttpConnectionManager cm = new ThreadLocalHttpConnectionManager();
+        HttpConnectionManager cm = null;
+        
+        //Choose from http connection manager types
+        if ("default".equalsIgnoreCase(this.getConnectionManager())) {
+          cm = new MultiThreadedHttpConnectionManager();
+        } else if ("ThreadedLocal".equalsIgnoreCase(this.getConnectionManager())) {
+          cm = new ThreadLocalHttpConnectionManager();
+        } else if ("MultiThreaded".equalsIgnoreCase(this.getConnectionManager())) {
+          cm = new MultiThreadedHttpConnectionManager();
+        } else if ("Single".equalsIgnoreCase(this.getConnectionManager())) {
+          cm = new SingleHttpConnectionManager();  
+        }
         
         // TODO: The following settings should be made in the corresponding
         // HttpConnectionManager, not here.
@@ -1803,7 +1823,7 @@ public class FetchHTTP extends Processor implements Lifecycle {
         // Set default socket timeout.
         hcp.setSoTimeout(timeout);
         // Set client to be version 1.0.
-        hcp.setVersion(HttpVersion.HTTP_1_0);
+        hcp.setVersion(this.getUseHTTP11()?HttpVersion.HTTP_1_1:HttpVersion.HTTP_1_0);
 
         // configureHttpCookies(defaults);
 
