@@ -45,7 +45,7 @@
 					</maxHops>
 					<seedsRetry>
 						<dxf:attribute name="retryDelay" display="Retry delay"
-							type="string" min="0" default="20" validations="required,integer"
+							type="integer" min="0" default="20" validations="required,integer"
 							placeholder="20">
 							<dxf:help>Time in seconds to wait between retries for failed
 								seeds.</dxf:help>
@@ -56,7 +56,7 @@
 						</dxf:attribute>
 					</seedsRetry>
 					<millisecondsPerRequest display="Milliseconds per request"
-						type="string" min="0" default="3000" validations="required,integer"
+						type="integer" min="0" default="3000" validations="required,integer"
 						placeholder="3000">
 						<dxf:help>The number of milliseconds to wait between each request
 							made by Heritrix during the crawl.
