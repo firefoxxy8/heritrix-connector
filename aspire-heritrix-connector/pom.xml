@@ -137,7 +137,7 @@
               com.searchtechnologies.aspire.services.auditing,
               com.searchtechnologies.aspire.services.distributed,
               com.searchtechnologies.aspire.services.groupexpansion,
-              com.searchtechnologies.aspire.services.groupexpansion.ldap,
+              com.searchtechnologies.aspire.services.groupexpansion.attributes,
               com.searchtechnologies.aspire.services.noSql,
               com.searchtechnologies.aspire.groupexpansion,
               com.searchtechnologies.aspire.groupexpansion.cache,
