@@ -269,33 +269,33 @@
 					</workflowReloadPeriod>
 					
 					<batchSize display="Scanner Batch Size" type="integer"
-						default="50" min="1" max="10000" validations="integer" style="width:100px">
+						default="50" min="1" max="10000" validations="integer,required" style="width:100px">
 						<dxf:help>Size of the batches the connector will be generating for
 							the publishers to work with.</dxf:help>
 					</batchSize>
 					
 					<batchTimeout display="Scanner Batch Timeout" type="integer"
-						default="60000" min="1" validations="integer">
+						default="60000" min="1" validations="integer,required">
 						<dxf:help>The period after which the scanner will stop the batch
 							process. Defaults value is in ms unit
 						</dxf:help>
 					</batchTimeout>
 					
 					<waitForSubJobs display="Wait for Sub Jobs timeout"
-						type="integer" default="600000" min="1" validations="integer"
+						type="integer" default="600000" min="1" validations="integer,required"
 						style="width:100px">
 						<dxf:help>Maximum time to wait (in ms) for all subjobs to be
 							complete.</dxf:help>
 					</waitForSubJobs>
 					
 					<maxThreads display="Max Threads" type="integer"
-						default="10" min="1" validations="integer" style="width:100px">
+						default="10" min="1" validations="integer,required" style="width:100px">
 						<dxf:help>The maximum number of threads to create to handle jobs
 							put on the pipeline manager job queue.</dxf:help>
 					</maxThreads>
 					
 					<jobQueue display="Job Queue Size" type="integer" default="30"
-						min="1" validations="integer" style="width:100px">
+						min="1" validations="integer,required" style="width:100px">
 						<dxf:help>The size of the queue for processing jobs. It is
 							recommended that the queue size be at least
 							as large as the number of threads, if not two or three times
@@ -303,7 +303,7 @@
 						</dxf:help>
 					</jobQueue>
 					
-					<extractTimeout display="Extract Text Timeout" type="integer" default="180000" min="1" max="180000000" validations="integer">
+					<extractTimeout display="Extract Text Timeout" type="integer" default="180000" min="1" max="180000000" validations="integer,required">
 						<dxf:help>Maximum time to wait (in ms) for the text extraction</dxf:help>
 					</extractTimeout>
 					
