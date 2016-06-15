@@ -20,7 +20,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.searchtechnologies.aspire</groupId>
   <artifactId>heritrix</artifactId>
-  <version>3.0</version>
+  <version>3.1-SNAPSHOT</version>
   <name>Heritrix connector</name>
   <description>Super POM to build Heritrix connector app-bundle and components in order</description>
   <url>http://www.searchtechnologies.com</url>

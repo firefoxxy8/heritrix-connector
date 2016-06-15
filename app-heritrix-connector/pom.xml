@@ -20,7 +20,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.searchtechnologies.aspire</groupId>
   <artifactId>app-heritrix-connector</artifactId>
-  <version>3.0</version>
+  <version>3.1-SNAPSHOT</version>
   <name>Aspire Heritrix Connector Application</name>
   <url>http://www.searchtechnologies.com</url>
   <properties>
@@ -74,13 +74,13 @@
     <dependency>
       <groupId>com.searchtechnologies.aspire</groupId>
       <artifactId>aspire-application</artifactId>
-      <version>3.0</version>
+      <version>3.1-SNAPSHOT</version>
       <type>jar</type>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.main</artifactId>
-      <version>3.0.6</version>
+      <version>3.1-SNAPSHOT.6</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
