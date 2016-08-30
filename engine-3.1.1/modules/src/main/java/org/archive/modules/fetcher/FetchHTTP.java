@@ -754,24 +754,32 @@ public class FetchHTTP extends Processor implements Lifecycle {
                 } else if (addedCredentials) {
                     String response = null;
 
-                    response = method.getResponseBodyAsString();
-                    
+                    boolean ntlm = false; 
                     if (curi.hasCredentials()) {
                         for (Credential c : getCredentialStore().getCredentials().values()) {
-                            if (c.getExpireAfter() != -1) {
-                                if (c.rootUriMatch(serverCache, curi) && !c.isExpired() && c.getExpiredContent()!=null 
-                                        && response.contains(c.getExpiredContent())) {
-                                    c.setExpired();
-                                    curi.setHttpMethod(null);
-                                    curi.setFetchStatus(S_EXPIRED_CREDENTIAL);
-                                    return;
-                                }
-                                
+                          if (c instanceof HttpAuthenticationCredential) {
+                            HttpAuthenticationCredential cred = (HttpAuthenticationCredential)c;
+                            ntlm = cred.getUsingNtlm();
+                          }
+                          if (c.getExpireAfter() != -1) {
+                            response = method.getResponseBodyAsString();
+                            if (c.rootUriMatch(serverCache, curi) && !c.isExpired() && c.getExpiredContent()!=null 
+                                && response.contains(c.getExpiredContent())) {
+                              c.setExpired();
+                              curi.setHttpMethod(null);
+                              curi.setFetchStatus(S_EXPIRED_CREDENTIAL);
+                              return;
                             }
+                          }
                         }
                     }
-                    rec.getRecordedInput().getRecordingOutputStream().write(response.getBytes());
-                    rec.getRecordedInput().getRecordingOutputStream().close();
+                    if (!ntlm)
+                      rec.getRecordedInput().readFullyOrUntil(softMax);
+                    else {
+                      //This is to make it faster
+                      rec.getRecordedInput().getReplayInputStream().read(method.getResponseBody());
+                      rec.getRecordedInput().getRecordingOutputStream().close();
+                    }
                     
                 } else {
                     
