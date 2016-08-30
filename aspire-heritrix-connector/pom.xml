@@ -21,7 +21,7 @@
   <groupId>com.searchtechnologies.aspire</groupId>
   <artifactId>aspire-heritrix-connector</artifactId>
   <packaging>bundle</packaging>
-  <version>3.0</version>
+  <version>3.0.0.1-SNAPSHOT</version>
   <name>Aspire Heritrix Connector</name>
   <description>Heritrix Scanner for Aspire</description>
   <url>http://www.searchtechnologies.com</url>
