@@ -20,7 +20,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.searchtechnologies.aspire</groupId>
   <artifactId>app-heritrix-connector</artifactId>
-  <version>3.2-SNAPSHOT</version>
+  <version>3.2-SNAPSHOTTT</version>
   <name>Aspire Heritrix Connector Application</name>
   <url>http://www.searchtechnologies.com</url>
   <properties>
