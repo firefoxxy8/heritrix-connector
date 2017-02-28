@@ -54,6 +54,12 @@ public class AspireHeritrixProcessor extends Processor {
    */
   private String cleanupRegex;
   
+  private String[] cleanupTypes = {
+                       "text/html",
+                       "application/xhtml+xml",
+                       "text/xml",
+                       "application/xml"};
+  
   /**
    * Set a regex to exclude from the content (and MD5 value)
    * @param cleanupRegex
@@ -180,7 +186,15 @@ public class AspireHeritrixProcessor extends Processor {
     if (cleanupRegex.isEmpty())
       return is;
     
-    if (is != null && (type.matches("(.*html.*)|(.*text.*)|(.*xml.*)"))) { 
+    boolean matches = false;
+    for (String contentType : cleanupTypes) {
+      if (StringUtilities.equalsIgnoreCase(type, contentType)) {
+        matches = true;
+        break;
+      }
+    }
+    
+    if (is != null && matches) { 
       
       String html = (String) uri.getData().get("xslt");
       if (html!=null){
