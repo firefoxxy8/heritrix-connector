@@ -188,7 +188,7 @@ public class AspireHeritrixProcessor extends Processor {
     
     boolean matches = false;
     for (String contentType : cleanupTypes) {
-      if (StringUtilities.equalsIgnoreCase(type, contentType)) {
+      if (type.toLowerCase().contains(contentType)) {
         matches = true;
         break;
       }
