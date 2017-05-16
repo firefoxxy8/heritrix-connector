@@ -38,7 +38,7 @@
         <dependency>
           <groupId>com.searchtechnologies.aspire</groupId>
           <artifactId>aspire-core</artifactId>
-          <version>3.1-SNAPSHOT</version>
+          <version>3.2-SNAPSHOT</version>
           <scope>provided</scope>
         </dependency>
       </dependencies>
@@ -378,7 +378,7 @@
     <dependency>
       <groupId>com.searchtechnologies.aspire</groupId>
       <artifactId>aspire-services</artifactId>
-      <version>3.1</version>
+      <version>3.2-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
 
@@ -386,7 +386,7 @@
     <dependency>
       <groupId>com.searchtechnologies.aspire</groupId>
       <artifactId>aspire-framework</artifactId>
-      <version>3.1</version>
+      <version>3.2-SNAPSHOT</version>
     </dependency>
 
     <!-- TESTING -->
@@ -405,7 +405,7 @@
     <dependency>
       <groupId>com.searchtechnologies.aspire</groupId>
       <artifactId>aspire-application</artifactId>
-      <version>3.1</version>
+      <version>3.2-SNAPSHOT</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -594,13 +594,13 @@
     <dependency>
       <groupId>com.searchtechnologies.aspire</groupId>
       <artifactId>aspire-ctb</artifactId>
-      <version>3.1</version>
+      <version>3.2-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.searchtechnologies.aspire</groupId>
       <artifactId>aspire-test</artifactId>
-      <version>3.1</version>
+      <version>3.2-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -619,7 +619,7 @@
     <dependency>
       <groupId>com.searchtechnologies.aspire</groupId>
       <artifactId>aspire-fetch-url</artifactId>
-      <version>3.1</version>
+      <version>3.2-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -635,12 +635,12 @@
     <dependency>
       <groupId>com.searchtechnologies.aspire</groupId>
       <artifactId>aspire-scanner</artifactId>
-      <version>3.1</version>
+      <version>3.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.searchtechnologies.aspire</groupId>
       <artifactId>aspire-simple-group-expander</artifactId>
-      <version>3.1</version>
+      <version>3.2-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
 	<dependency>
