@@ -21,7 +21,7 @@
   <groupId>com.searchtechnologies.aspire</groupId>
   <artifactId>aspire-heritrix-connector</artifactId>
   <packaging>bundle</packaging>
-  <version>2.2.2</version>
+  <version>2.2.2.1-SNAPSHOT</version>
   <name>Aspire Heritrix Connector</name>
   <description>Heritrix Scanner for Aspire</description>
   <url>http://www.searchtechnologies.com</url>
@@ -240,13 +240,10 @@
               !sun.net.spi.nameservice,
               !sun.reflect,
               !sun.security.tools,
-              !com.sun.jdmk.comm,
               !javax.swing.event,
               !javax.swing.tree,
               !javax.security.auth.login,
-              !javax.security.auth.callback,
               !javax.security.cert,
-              !javax.security.sasl,
               !org.slf4j,
               !com.sun.java.browser.net,
               !com.thoughtworks.xstream,
@@ -306,7 +303,15 @@
               !com.searchtechnologies.aspire.services.contentrepository,
               !com.searchtechnologies.aspire.jms,
               !com.searchtechnologies.aspire.jms.contentrepository,
-              !javax.jms
+              !javax.jms,
+              
+              !javax.mail,
+              !jline,
+              !org.apache.log4j,
+              !org.apache.log4j,
+              !org.fusesource.jansi,
+              !org.mortbay.jetty.ajp,
+              !org.apache.log4j.xml
             </Import-Package>
             <Embed-Transitive>true</Embed-Transitive>
             <Embed-Dependency>!aspire-framework,*;scope=compile</Embed-Dependency>
@@ -608,6 +613,18 @@
       <groupId>org.mapdb</groupId>
       <artifactId>mapdb</artifactId>
       <version>1.0.7</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dnsjava</groupId>
+      <artifactId>dnsjava</artifactId>
+      <version>2.0.6</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.anotherbigidea</groupId>
+      <artifactId>javaswf</artifactId>
+      <version>1-SNAPSHOT</version>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
   <distributionManagement>

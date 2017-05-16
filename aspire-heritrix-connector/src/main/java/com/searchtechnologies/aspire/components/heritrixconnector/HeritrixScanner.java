@@ -315,6 +315,11 @@ public class HeritrixScanner extends AbstractPushScanner {
 
         checkForCheckpoints(job, info);
 
+        //wait for the job to be launchable 
+        while (!job.isLaunchable()) {
+          busyWait(100);
+        }
+        
         job.launch();
 
         //wait for the job to be running (starts paused)
