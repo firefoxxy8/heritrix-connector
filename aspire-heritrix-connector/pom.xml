@@ -21,7 +21,7 @@
   <groupId>com.searchtechnologies.aspire</groupId>
   <artifactId>aspire-heritrix-connector</artifactId>
   <packaging>bundle</packaging>
-  <version>3.2-SNAPSHOT</version>
+  <version>3.1.1-SNAPSHOT</version>
   <name>Aspire Heritrix Connector</name>
   <description>Heritrix Scanner for Aspire</description>
   <url>http://www.searchtechnologies.com</url>
@@ -38,7 +38,7 @@
         <dependency>
           <groupId>com.searchtechnologies.aspire</groupId>
           <artifactId>aspire-core</artifactId>
-          <version>3.1-SNAPSHOT</version>
+          <version>3.1.1-SNAPSHOT</version>
           <scope>provided</scope>
         </dependency>
       </dependencies>
@@ -635,12 +635,12 @@
     <dependency>
       <groupId>com.searchtechnologies.aspire</groupId>
       <artifactId>aspire-scanner</artifactId>
-      <version>3.1</version>
+      <version>3.1.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.searchtechnologies.aspire</groupId>
       <artifactId>aspire-simple-group-expander</artifactId>
-      <version>3.1</version>
+      <version>3.1.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
 	<dependency>
