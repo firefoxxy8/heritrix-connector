@@ -319,6 +319,7 @@ public class HeritrixScanner extends AbstractPushScanner {
         while (!job.isLaunchable()) {
           busyWait(100);
         }
+        busyWait(5000);
         
         job.launch();
 
