@@ -173,12 +173,16 @@ public class CrawlJob implements Comparable<CrawlJob>, ApplicationListener<Appli
             BufferedReader jobLogReader = new BufferedReader(
                     new InputStreamReader(jobLogIn));
             String line;
-            while ((line = jobLogReader.readLine()) != null) {
+            try {
+              while ((line = jobLogReader.readLine()) != null) {
                 Matcher m = launchLine.matcher(line);
                 if (m.matches()) {
-                    launchCount++;
-                    lastLaunch = new DateTime(m.group(1));
+                  launchCount++;
+                  lastLaunch = new DateTime(m.group(1));
                 }
+              }
+            } catch (IllegalArgumentException iae) {
+              this.getJobLogger().log(Level.WARNING, "Couldn't set lastLaunch time", iae);
             }
             jobLogReader.close();
         } catch (IOException e) {
