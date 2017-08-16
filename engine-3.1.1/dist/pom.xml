@@ -3,13 +3,13 @@
 	<parent>
 		<groupId>archive</groupId>
 		<artifactId>heritrix</artifactId>
-		<version>3.1.1.5</version>
+		<version>3.1.1.6-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>archive.heritrix</groupId>
 	<artifactId>heritrix</artifactId>
 	<packaging>pom</packaging>
-	<name>Heritrix 3.1.1.5 (distribution bundles)</name>
+	<name>Heritrix 3.1.1.6 (distribution bundles)</name>
 
 	<repositories>
 		<repository>

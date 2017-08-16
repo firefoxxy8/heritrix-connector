@@ -20,9 +20,9 @@ http://maven.apache.org/guides/mini/guide-m1-m2.html
 	<groupId>archive</groupId>
 	<!--This project is parent to all under 'projects' subdirectory-->
 	<artifactId>heritrix</artifactId>
-	<version>3.1.1.5</version>
+	<version>3.1.1.6-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>Heritrix 3.1.1.5</name>
+	<name>Heritrix 3.1.1.6-SNAPSHOT</name>
 	<description>
 		Heritrix is the Internet Archive's open-source, extensible, web-scale,
 		archival-quality web crawler project.
