@@ -323,6 +323,7 @@ public class HeritrixScanner extends AbstractPushScanner {
   public void crawl(HeritrixSourceInfo info) throws AspireException{
  
       stop = false;
+      paused = false;
       CrawlJob job;
 
       job = info.getCrawlJob();
@@ -363,25 +364,28 @@ public class HeritrixScanner extends AbstractPushScanner {
         info.canContinue() && info.getStatus() != SourceInfo.SCAN_ABORTED) {
       busyWait(100);
     }
-    if (paused) 
+    if (paused && !stop) 
       return;
     
-    if (!stop) {
-      //Delete the checkpoints
-      if (job.getCheckpointService()!=null) {
-        debug("Deleting checkpoints");
-        for (File file : job.getCheckpointService().findAvailableCheckpointDirectories()) {
-          while (!FileUtilities.delete(file)) {
-            try {
-              Thread.sleep(100);
-            } catch (InterruptedException e) {
-              // Do nothing
-            }
+    //Delete the checkpoints
+    if (job.getCheckpointService()!=null) {
+      debug("Deleting checkpoints");
+      for (File file : job.getCheckpointService().findAvailableCheckpointDirectories()) {
+        while (!FileUtilities.delete(file)) {
+          try {
+            Thread.sleep(100);
+          } catch (InterruptedException e) {
+            // Do nothing
           }
         }
-        debug("Checkpoints deleted");
       }
-      job.teardown();
+      debug("Checkpoints deleted");
+    } else {
+      warn("The checkpoints service was null, couldn't delete checkpoints");
+    }
+    
+    job.teardown();
+    if (!stop) {
 
       info.getIncrementalDB().put("||status||", HeritrixSourceInfo.INITIAL_CRAWL_COMPLETE+","+info.getStartCrawlTime().getTime());
 
@@ -394,8 +398,6 @@ public class HeritrixScanner extends AbstractPushScanner {
         throw new AspireException("com.searchtechnologies.aspire.components.heritrixconnector.HeritrixScanner", ioe,
             "Error trying to process uncrawled urls");
       }
-    } else {
-      job.teardown();
     }
     
     
