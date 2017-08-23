@@ -418,17 +418,17 @@
     <dependency>
       <groupId>archive.heritrix</groupId>
       <artifactId>heritrix-commons</artifactId>
-      <version>3.1.1.7</version>
+      <version>3.1.1.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>archive.heritrix</groupId>
       <artifactId>heritrix-engine</artifactId>
-      <version>3.1.1.7</version>
+      <version>3.1.1.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>archive.heritrix</groupId>
       <artifactId>heritrix-modules</artifactId>
-      <version>3.1.1.7</version>
+      <version>3.1.1.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
